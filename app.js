@@ -37,11 +37,6 @@ io.use(socketSession)
 
 app.set('view engine', 'ejs')
 
-io.set('authorization', (handshake, callback) => {
-	// Check if user logged in
-  callback(null, true);
-});
-
 io.on('connection', (socket) => {
 	console.log('New user connected')
 
@@ -57,6 +52,9 @@ require('./routes.js')
 require('./inc/functions.js')
 require('./inc/api.js')
 require('./inc/database.js')
+
+// on join add roomid to session
+// on /game allow join interface
 
 global.sck.game.on('connection', (socket) => {
 	socket.on('join', (room, secret) => {

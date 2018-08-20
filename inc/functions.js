@@ -1,6 +1,8 @@
 
 const $ = global
 
+var prev = true
+
 $.fn.renderError = (res, error, status) => {
   if (!status)
     status = 400
@@ -10,8 +12,18 @@ $.fn.renderError = (res, error, status) => {
 }
 
 $.fn.generateRoomCode = (callback) => {
+
+  // TESTER FOR REGENERATE NEW CODE IF EXISTS
+  // if (prev){
+  //   prev = false
+  //   return callback(null, '56d7a57a')
+  // } else
+  //   return callback(null, '56d7a57a2')
+
   // Asynchronous
-  const code = global.crypto.randomBytes(48, (err, buffer) => {
-    var token = buffer.toString('hex');
+  const code = global.crypto.randomBytes(4, (err, buffer) => {
+    if (err)
+      return callback(err)
+    return callback(null, buffer.toString('hex'))
   });
 }

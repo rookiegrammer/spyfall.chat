@@ -25,7 +25,7 @@ module.exports = User
 UserSchema.pre('save', function(next) {
 
   var user = this;
-  global.bcrypt.hash( user.pass, 10, (err, hash) => {
+  global.bcrypt.hash( user.pass, 10, function(err, hash) {
       if (err) return next(err)
       user.pass = hash
       next()
@@ -48,9 +48,9 @@ global.fn.createUser = function(username, password, callback) {
   User.create(user, callback)
 }
 
-global.fn.verifyUser = (username, password, callback) => {
+global.fn.verifyUser = function(username, password, callback) {
   // Check session
-  User.findById(username, (err, user) => {
+  User.findById(username, function(err, user) {
 
     const error = new Error('Username is not registered or may not have the correct password.')
     error.status = 401
@@ -70,23 +70,28 @@ global.fn.verifyUser = (username, password, callback) => {
   });
 }
 
-global.fn.checkUser = (req, callback) => {
+// Login or verify
+global.fn.checkUser = function(req, callback) {
   const username = req.body.username
 
-  // Check if user requested password
+  // Check if user has session and is not logging in
   if (!username && req.session && req.session.username)
     return callback(null, req.session.username)
 
   const password = req.body.password
 
-  // Check validity
-
-  const extcallback = function(err, username) {
-    if (!err)
-      req.session.username = username
-
-    return callback(err, username)
+  // User didn't provide credentials
+  if (!password && !username) {
+    const error = new Error('User is not logged in.')
+    error.status = 400
+    return callback(error, null)
   }
 
-  global.fn.verifyUser(username, password, extcallback)
+  global.fn.verifyUser(username, password, function(err, username) {
+    if (err)
+      return callback(err, null)
+
+    req.session.username = username
+    return callback(null, username)
+  })
 }

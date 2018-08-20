@@ -26,12 +26,16 @@ app.get('/signin', (req, res) => {
 	res.render('login')
 })
 
+app.get('/open', (req, res) => {
+	res.render('join')
+})
+
 app.post('/api/:command', (req, res) => {
 	if (global.handle[req.params.command])
 		global.handle[req.params.command](
 			req,
 			res,
-			(req.query.redirect)?req.query.redirect:null
+			(req.body.webapp)?true:false
 		)
 	else {
 		global.fn.renderError(res, 'BAD INTERFACE: '+req.params.command, 400)

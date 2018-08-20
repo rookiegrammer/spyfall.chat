@@ -11,11 +11,10 @@
       <section id="feedback"></section>
     </section>
 
-
-    <section id="input_zone">
-      <input id="message" class="vertical-align" type="text" />
-      <button id="send_message" class="vertical-align" type="button">Send</button>
-    </section>
+    <form action="/api/create" method="post">
+      <input type="hidden" name="webapp" value="true">
+      <button type="submit">Create Room</button>
+    </form>
 
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 

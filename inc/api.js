@@ -8,40 +8,111 @@
 
 const $ = global
 
-$.handle.register = (req, res, redirect) => {
+$.handle.register = (req, res, webapp) => {
   const query = req.body
-  const callback = (err, user) => {
+  $.fn.createUser(query.username, query.password, function(err, user) {
 
     if (err)
       return $.fn.renderError(res, err.message, err.status)
 
     console.log('Registered User: '+query.username)
 
-    if (redirect)
-      res.redirect(redirect)
-    else {
+    if (webapp) {
+      res.render('success', {action: 'Registered Account', message: 'You have successfully registered with spyfall.chat'})
+    } else {
       // Respond with JSON
     }
-  }
-  $.fn.createUser(query.username, query.password, callback)
+  })
 }
 
-$.handle.login = (req, res, redirect) => {
-  const callback = (err, username) => {
+$.handle.login = (req, res, webapp) => {
+  $.fn.checkUser(req, function(err, username) {
     if (err)
       return $.fn.renderError(res, err.message, err.status)
 
     console.log('Logged In: '+username)
 
-    // Store in session variable
-    if ( !req.session.username )
-      req.session.username = username
+    const redirect = req.query.redirect
 
     if (redirect)
       res.redirect(redirect)
+    else if (webapp)
+      res.render('success', {action: 'Logged In', message: 'You have successfully logged in to spyfall.chat'})
     else {
       // Respond with JSON
     }
+  })
+}
+
+/*
+ * Add active games
+ */
+
+/*
+ * Add leave game
+ * - Check if no more players then also destroy room
+ */
+
+$.handle.create = (req, res, webapp) => {
+
+  const error_handle = function(err) {
+    return $.fn.renderError(res, err.message, err.status)
   }
-  $.fn.checkUser(req, callback)
+
+  global.fn.checkUser(req, function(err, user) {
+    if (err)
+      return error_handle(err)
+
+    global.fn.createRoom(user, function(err, code) {
+      if (err)
+        return error_handle(err)
+
+      if (!req.session.rooms)
+        req.session.rooms = {}
+
+      req.session.rooms[code] = {
+        master: true
+        // spy: ?,
+      }
+
+      if (webapp)
+        res.render('success', {action: 'Created Room', message: 'You have made a room with code <strong>'+code+'</strong>'})
+      else {
+        // Respond with JSON
+      }
+    })
+  })
+
+}
+
+$.handle.join = (req, res, webapp) => {
+
+  const error_handle = function(err) {
+    return $.fn.renderError(res, err.message, err.status)
+  }
+
+  global.fn.checkUser(req, function(err, user) {
+    if (err)
+      return error_handle(err)
+
+    global.fn.addToRoom(user, req.body.room, function(err, room) {
+      if (err)
+        return error_handle(err)
+
+      if (!req.session.rooms)
+        req.session.rooms = {}
+
+      if (!req.session.rooms[room._id])
+        req.session.rooms[room._id] = {
+          master: false
+        }
+
+      if (webapp)
+        res.render('success', {action: 'Joined Room', message: 'You have joined the room with code <strong>'+room._id+'</strong>'})
+      else {
+        // Respond with JSON
+      }
+    })
+  })
+
 }

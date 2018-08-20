@@ -1,6 +1,8 @@
 <% include partials/head %>
 
-    <form action="/api/register?redirect=%2f" method="post">
+    <form action="/api/register" method="post">
+      <input type="hidden" name="webapp" value="true">
+
       <label>
         Username
         <input type="text" name="username">

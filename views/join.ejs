@@ -1,16 +1,11 @@
 <% include partials/head %>
 
-    <form action="/api/login" method="post">
+    <form action="/api/join" method="post">
       <input type="hidden" name="webapp" value="true">
 
       <label>
-        Username
-        <input type="text" name="username">
-      </label>
-
-      <label>
-        Password
-        <input type="password" name="password">
+        Room
+        <input type="text" name="room">
       </label>
 
       <button type="submit">Submit</button>
