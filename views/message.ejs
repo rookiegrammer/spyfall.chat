@@ -1,0 +1,13 @@
+<%- include('partials/head', {req: ['/client-chat']}) %>
+<i>* This is a testing page for messaging function.</i>
+<div id="msg-wrapper" class="uk-margin uk-card uk-card-secondary uk-card-hover uk-card-body">
+
+</div>
+
+<script>
+  $(function() {
+    ReactDOM.render(React.createElement(MessageBox), $( "#msg-wrapper" )[ 0 ]);
+  })
+</script>
+
+<% include partials/footer %>

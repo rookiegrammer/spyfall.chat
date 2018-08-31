@@ -15,6 +15,14 @@ app.get('/signup', (req, res) => {
 	res.render('register')
 })
 
+app.get('/messages', (req, res) => {
+	res.render('message')
+})
+
+app.get('/game', (req, res) => {
+	res.render('game')
+})
+
 app.get('/room/:roomId', (req, res) => {
 	res.send(req.params)
 	// Check if logged in..

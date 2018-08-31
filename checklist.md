@@ -1,0 +1,2 @@
+- [ ] Always display message box in game
+- [ ] Check for roomcode errors

@@ -1,24 +1,13 @@
 <% include partials/head %>
 
-    <section>
-      <div id="change_username">
-	<input id="username" type="text" />
-	<button id="send_username" type="button">Change username</button>
-      </div>
-    </section>
+<form action="/api/create" method="post">
+  <input type="hidden" name="webapp" value="true">
+  <button type="submit" class="uk-button uk-button-primary">Create a Room</button>
+</form>
 
-    <section id="chatroom">
-      <section id="feedback"></section>
-    </section>
+<script src="/js/jquery-latest.min.js"></script>
 
-    <form action="/api/create" method="post">
-      <input type="hidden" name="webapp" value="true">
-      <button type="submit">Create Room</button>
-    </form>
-
-    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
-
-    <script src="js/socket.io.dev.js"></script>
-    <script src="client-game.js"></script>
+<script src="/js/socket.io.dev.js"></script>
+<script src="/client-game.js"></script>
 
 <% include partials/footer %>

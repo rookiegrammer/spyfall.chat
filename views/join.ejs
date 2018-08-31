@@ -1,14 +1,12 @@
 <% include partials/head %>
-
-    <form action="/api/join" method="post">
-      <input type="hidden" name="webapp" value="true">
-
-      <label>
-        Room
-        <input type="text" name="room">
-      </label>
-
-      <button type="submit">Submit</button>
-    </form>
-
+<div class="uk-card uk-card-secondary uk-card-hover uk-card-body uk-light">
+  <h1 class="uk-card-title">Open a <strong>spyfall.chat</strong> room</h1>
+  <form action="/api/join" method="post">
+    <input type="hidden" name="webapp" value="true">
+    <div class="uk-margin">
+      <input class="uk-input" type="text" placeholder="Room Code" name="room">
+    </div>
+    <button type="submit" class="uk-button uk-button-primary">Open</button>
+  </form>
+</div>
 <% include partials/footer %>

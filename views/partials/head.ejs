@@ -2,18 +2,57 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" const="text/html;charset=UTF-8" />
-    <title>Simple Chat App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spyfall.chat</title>
+
+    <link rel="stylesheet" href="/css/client-theme.css">
+
+    <script src="/js/jquery-latest.min.js"></script>
+
+    <script src="/js/twemoji.min.js"></script>
+
+    <script src="/js/uikit.min.js"></script>
+    <script src="/js/uikit-icons.min.js"></script>
 
     <!-- Load React. -->
     <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
-    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="/js/react.development.js"></script>
+    <script src="/js/react-dom.development.js"></script>
 
-    <script src="client-components.js"></script>
-    <script src="client-app.js"></script>
+    <script src="/js/socket.io.dev.js"></script>
+
+    <% if (typeof req !== 'undefined') { req.forEach(function(require){ %>
+      <script src="<%- require %>.js"></script>
+    <% }); } %>
+
+    <script src="/client-components.js" crossorigin></script>
+    <script src="/client-app.js"></script>
   </head>
 
   <body>
+
     <header>
-      <h1>Super Chat</h1>
+      <div class="uk-container">
+        <div class="uk-navbar-left">
+          <a class="uk-navbar-item uk-logo" href="/">spyfall.chat</a>
+          <div class="uk-navbar-item">
+              <a href="/messages"><i>Messages</i></a>
+          </div>
+          <div class="uk-navbar-item">
+              <a href="/game"><i>Game</i></a>
+          </div>
+        </div>
+        <div class="uk-navbar-right">
+          <div class="uk-navbar-item">
+              <a href="/signin"><i>Sign In</i></a>
+          </div>
+          <div class="uk-navbar-item">
+              <a href="/signup"><i>Sign Up</i></a>
+          </div>
+          <div class="uk-navbar-item">
+              <a href="/open"><i>Join</i></a>
+          </div>
+        </div>
+      </div>
     </header>
+    <div class="uk-container">

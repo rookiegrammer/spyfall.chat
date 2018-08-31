@@ -30,7 +30,9 @@ $.handle.login = (req, res, webapp) => {
     if (err)
       return $.fn.renderError(res, err.message, err.status)
 
-    console.log('Logged In: '+username)
+
+
+    console.log('Logged In: '+req.session.username)
 
     const redirect = req.query.redirect
 
@@ -99,13 +101,10 @@ $.handle.join = (req, res, webapp) => {
       if (err)
         return error_handle(err)
 
-      if (!req.session.rooms)
-        req.session.rooms = {}
+      // Abandoned storing rooms identifying in sessions
+      // RE: It makes room handling and kicking out harder
 
-      if (!req.session.rooms[room._id])
-        req.session.rooms[room._id] = {
-          master: false
-        }
+      global.sck.game.in(req.body.room).emit('player_joined game', user)
 
       if (webapp)
         res.render('success', {action: 'Joined Room', message: 'You have joined the room with code <strong>'+room._id+'</strong>'})

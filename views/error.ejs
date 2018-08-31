@@ -1,5 +1,9 @@
 <% include partials/head %>
 
-ERROR <%= status %>: <%= error %>
+<div class="uk-card uk-card-secondary uk-card-body">
+    <div class="uk-card-badge uk-label">API</div>
+    <h2 class="uk-card-title">Error <%= status %></h2>
+    <p><%= error %></p>
+</div>
 
 <% include partials/footer %>

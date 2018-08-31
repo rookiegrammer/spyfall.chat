@@ -36,16 +36,19 @@ global.fn.createUser = function(username, password, callback) {
   // Check validity with regex
 
 
-  // Check if user exists
-  if (false)
-    return callback('User already exists', null)
-
   var user = {}
   user._id = username
   user.pass = password
 
   //use schema.create to insert user into the db
-  User.create(user, callback)
+  User.create(user, function(err, user) {
+    if (err && err.code == 11000) {
+      const exists_error = new Error('User already exists.')
+      exists_error.status = 409
+      return callback(exists_error, user)
+    }
+    callback(err, user)
+  })
 }
 
 global.fn.verifyUser = function(username, password, callback) {
@@ -93,5 +96,11 @@ global.fn.checkUser = function(req, callback) {
 
     req.session.username = username
     return callback(null, username)
+  })
+}
+
+global.fn.userExists = function(user, callback) {
+  User.countDocuments({_id: user}, function(err, count) {
+    callback(err, count > 0)
   })
 }

@@ -1,0 +1,38 @@
+{
+  "version": "1.1",
+  "decks": {
+    "default" : {
+      "name" : "",
+      "author": "",
+      "piles" : {
+        "Airplane": ["1st Class Passenger", "Air Marshal", "Mechanic", "Coach Passenger", "Flight Attendant", "Co-Pilot", "Captain"],
+        "Bank": ["Armored Car Driver", "Bank Manager", "Loan Consultant", "Bank Robber", "Customer", "Security Guard", "Bank Teller"],
+        "Beach": ["Beach Bartender", "Kite Surfer", "Lifeguard", "Thief", "Beach Goer", "Beach Photographer", "Ice Cream Man"],
+        "Casino": ["Bartender", "Head of Security", "Bouncer", "Pit Boss", "Hustler", "Dealer", "Gambler"],
+        "Cathedral": ["Priest", "Beggar", "Sinner", "Parishioner", "Tourist", "Deacon", "Choir Singer"],
+        "Circus Tent": ["Acrobat", "Animal Tamer", "Magician", "Audience Member", "Fire Eater", "Clown", "Juggler"],
+        "Corporate Party": ["Entertainer", "Manager", "Party Crasher", "Owner/CEO", "Admin Assistant", "Accountant", "Delivery Boy"],
+        "Crusader Army": ["Monk", "Imprisoned Arab", "Servant", "Bishop", "Squire", "Archer", "Knight"],
+        "Day Spa": ["Customer", "Stylist", "Massage Tech", "Manicurist", "Makeup Artist", "Dermatologist", "Beautician"],
+        "Embassy": ["Security Guard", "Admin Assistant", "Ambassador", "Government Official", "Tourist", "Refugee", "Diplomat"],
+        "Hospital": ["Nurse", "Doctor", "Anesthesiologist", "Intern", "Patient", "Therapist", "Surgeon"],
+        "Hotel": ["Doorman", "Security Guard", "Hotel Manager", "Housekeeper", "Hotel Guest", "Bartender", "Valet"],
+        "Military Base": ["Deserter", "Colonel", "Medic", "Soldier", "Sniper", "XO (Exec. Officer)", "Tank Commander"],
+        "Movie Studio": ["Stuntman", "Sound Engineer", "Cameraman", "Director", "Costume Artist", "Actor", "Producer"],
+        "Ocean Liner": ["Rich Passenger", "Cook", "Captain", "Bartender", "Musician", "Writer", "Ship's Mechanic"],
+        "Passenger Train": ["Mechanic", "Border Patrol", "Chef", "Engineer", "Steward", "Ticket Taker", "Passenger"],
+        "Pirate Ship": ["Cook", "Sailor", "Slave", "Cannoneer", "Bound Prisoner", "Cabin Boy", "Pirate Captain"],
+        "Polar Station": ["Medic", "Geologist", "Expedition Leader", "Biologist", "Radioman", "Hydrologist", "Meteorologist"],
+        "Police Station": ["Detective", "Lawyer", "Journalist", "Forensic Scientist", "Evidence Archivist", "Patrol Officer", "Criminal"],
+        "Restaurant": ["Musician", "Customer", "Table Busser", "Host", "Head Chef", "Food Critic", "Server"],
+        "School": ["Gym Teacher", "Student", "Principal", "Security Guard", "Janitor", "Lunch Lady", "Maintenance Man"],
+        "Service Station": ["Manager", "Tire Specialist", "Motorcyclist", "Car Owner", "Car Washer", "Diagnostic Tech", "Auto Mechanic"],
+        "Space Station": ["Engineer", "Alien", "Tourist", "Pilot", "Mission Commander", "Scientist", "Doctor"],
+        "Submarine": ["Cook", "Captain", "Sonar Operator", "Weapons Technician", "Sailor", "Radioman", "Navigator"],
+        "Supermarket": ["Customer", "Cashier", "Butcher", "Janitor", "Produce Manager", "Food Sample Demo", "Shelf Stocker"],
+        "Theater": ["Coat Check", "Cue Card Prompter", "Ticket Office Cashier", "Thearer Visitor", "Director", "Actor", "Crewman"],
+        "University": ["Graduate Student", "Professor", "Dean", "Psychologist", "Maintenance Man", "Student", "Advisor"]
+      }
+    }
+  }
+}

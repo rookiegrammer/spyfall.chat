@@ -1,0 +1,85 @@
+//
+// Core
+//
+
+// 2. Import default variables and available mixins.
+@import "uikit/variables-theme.scss";
+@import "uikit/mixins-theme.scss";
+
+@import "uikit/uikit-theme.scss";
+
+@mixin msgbubble() {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  display: inline-block;
+  text-align: left;
+  white-space:pre;
+}
+
+img.emoji {
+   height: 1em;
+   width: 1em;
+   margin: 0 .05em 0 .1em;
+   vertical-align: -0.1em;
+}
+
+.player-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 4em;
+  height: 4em;
+
+  &.player-user {
+    width: 3em;
+    height: 3em;
+    border: solid $global-emphasis-color .5em;
+  }
+
+  border-radius: 2em;
+
+  margin: 0.2em;
+
+  background-color: $global-primary-background;
+  color: $global-inverse-color;
+
+  .player-label {
+    font-size: 2em;
+    font-weight: bold;
+
+  }
+}
+
+.player-reaction {
+  margin-top: -1em;
+  font-size: 2em;
+}
+
+.msg-inbound, .msg-outbound {
+  .msg-wrapper {
+    @include msgbubble()
+  }
+}
+
+.game-talk {
+  @include msgbubble()
+}
+
+.msg-inbound {
+  text-align: left;
+}
+
+.msg-outbound {
+  text-align: right;
+}
+
+.msg-inbound .msg-wrapper, .game-talk-a {
+  background-color: $global-background;
+  color: $global-emphasis-color;
+}
+
+.msg-outbound .msg-wrapper, .game-talk-q {
+  background-color: $global-primary-background;
+  color: $global-inverse-color;
+}
