@@ -4187,13 +4187,23 @@ iframe.uk-cover { pointer-events: none; }
 
 img.emoji { height: 1em; width: 1em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; }
 
-.player-avatar { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; width: 4em; height: 4em; border-radius: 2em; margin: 0.2em; background-color: #1e87f0; color: #fff; }
+.player-avatar, .menu-button { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; width: 4em; height: 4em; border-radius: 2em; margin: 0.2em; }
+
+.player-avatar { background-color: #1e87f0; color: #fff; }
 
 .player-avatar.player-user { width: 3em; height: 3em; border: solid #333 0.5em; }
 
 .player-avatar .player-label { font-size: 2em; font-weight: bold; }
 
-.player-reaction { margin-top: -1em; font-size: 2em; }
+.menu-button { background-color: #222; }
+
+.menu-button, .menu-button:hover, .menu-button:active { color: #fff; }
+
+.menu-button:hover, .menu-button:active { background-color: #1e87f0; }
+
+.menu-button-label { font-size: 4em; }
+
+.player-reaction { margin-top: -0.9em; font-size: 2em; }
 
 .msg-inbound .msg-wrapper, .msg-outbound .msg-wrapper { padding: 0.5rem 1rem; border-radius: 0.5rem; display: inline-block; text-align: left; white-space: pre; }
 
@@ -4206,5 +4216,55 @@ img.emoji { height: 1em; width: 1em; margin: 0 .05em 0 .1em; vertical-align: -0.
 .msg-inbound .msg-wrapper, .game-talk-a { background-color: #fff; color: #333; }
 
 .msg-outbound .msg-wrapper, .game-talk-q { background-color: #1e87f0; color: #fff; }
+
+html.in-game, html.in-game body { height: 100%; }
+
+html.in-game body { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
+
+html.in-game body > .uk-container { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; overflow: hidden; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; width: 100%; margin: 0; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-sizing: border-box; box-sizing: border-box; max-width: none; }
+
+html.in-game #game-container, html.in-game .game-flex-col { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; }
+
+html.in-game .game-stretch { width: 100%; height: 100%; }
+
+html.in-game .game-flex-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; flex-direction: row; -webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; }
+
+html.in-game .game-scr-col { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; overflow-y: auto; }
+
+html.in-game .game-var-row { -webkit-box-flex: 1; -ms-flex: 1 0 auto; flex: 1 0 auto; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; display: -webkit-box; display: -ms-flexbox; display: flex; }
+
+html.in-game .player-box { overflow-y: auto; }
+
+html.in-game .game-initiate:disabled, html.in-game .game-initiate:disabled:hover, html.in-game .game-initiate:disabled:active { background-color: #222; color: #fff; cursor: not-allowed; }
+
+html.in-game .no-margin { margin: 0 !important; }
+
+@media (max-height: 640px) { html.in-game { font-size: 12px; } }
+
+@media (max-width: 720px) { html.in-game { font-size: 12px; } }
+
+@media (max-height: 480px) { html.in-game { font-size: 8px; } }
+
+@media (max-width: 640px) { html.in-game { font-size: 8px; } }
+
+@-webkit-keyframes showemoji { 0% { width: 0;
+    height: 0;
+    opacity: 1; }
+  70% { opacity: 0.9; }
+  100% { width: 3em;
+    height: 3em;
+    opacity: 0; } }
+
+@keyframes showemoji { 0% { width: 0;
+    height: 0;
+    opacity: 1; }
+  70% { opacity: 0.9; }
+  100% { width: 3em;
+    height: 3em;
+    opacity: 0; } }
+
+.player-reaction { position: relative; }
+
+.player-reaction.show::before { z-index: 0; content: ' '; border-radius: 50%; position: absolute; top: 50%; left: 50%; -webkit-transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%); background-color: #222; -webkit-animation-name: showemoji; animation-name: showemoji; -webkit-animation-duration: 1s; animation-duration: 1s; -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; }
 
 /*# sourceMappingURL=client-theme.css.map */

@@ -21,3 +21,6 @@ global.config.socket_port = 9000
 
 //
 global.config.session_secret = '$p13f@11'
+
+
+global.config.consensus_percent = 0.5

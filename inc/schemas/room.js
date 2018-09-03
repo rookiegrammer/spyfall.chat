@@ -14,11 +14,13 @@ const RoomSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  players: [{
-    username: String,
-    score: Number,
-    reaction: Number
-  }],
+  players: {
+    type: Map,
+    of: {
+      score: Number,
+      reaction: Number
+    }
+  },
   deck: {
     type: String,
     default: "default"
@@ -31,28 +33,18 @@ const RoomSchema = new mongoose.Schema({
     type: Number,
     default: 540,
   },
-  messages: [{
-    fromUsername: String,
-    question: String,
-    toUsername: String,
-    answer: String
-  }],
-  discussion: [{
-    fromUsername: String,
-    message: String
-  }],
   currentRound: {
     spy: String,
     location: String,
     dealer: String,
     number: Number,
-    suspicious: [String],
-    suspected: [String],
-    voting: {
-      type: Boolean,
-      default: false
+    willAccuse: [String],
+    hasAccused: [String],
+    phase: {
+      type: Number,
+      default: 0
     },
-    guessed: {
+    spyGuessed: {
       type: Boolean,
       default: false
     },
@@ -60,9 +52,25 @@ const RoomSchema = new mongoose.Schema({
       type: Map,
       of: String
     },
+    messages: [{
+      fromUsername: String,
+      question: String,
+      toUsername: String,
+      answer: String
+    }],
+    votes: {
+      type: Map,
+      of: Boolean
+    },
+    votingFor: String,
+    votedBy: String,
+    discussion: [{
+      fromUsername: String,
+      message: String
+    }],
     timerStarted: {
       type: Date
-    },
+    }
   }
 })
 
@@ -85,15 +93,17 @@ global.fn.createRoom = function(master, callback, options) {
     var room = {
       _id: code,
       master: master,
-      players: [{
-        username: master,
-        reaction: 0,
-        score: 0
-      }],
+      players: {},
       currentRound: {
         dealer: master,
-        number: 0
+        number: 0,
+        discussion: []
       }
+    }
+
+    room.players[master] = {
+      reaction: 0,
+      score: 0
     }
 
     if (options)
@@ -118,7 +128,7 @@ global.fn.createRoom = function(master, callback, options) {
 }
 
 global.fn.getRooms = function(user, callback) {
-  Room.find({ players: {$elemMatch: {username: user} } }, callback)
+  Room.find({ players: user }, callback)
 }
 
 global.fn.getLastMessage = function(roomcode, callback) {
@@ -126,9 +136,9 @@ global.fn.getLastMessage = function(roomcode, callback) {
     if (err)
       return callback(err, room, null)
 
-    const lastindex = room.messages.length-1
-    if (room.messages[lastindex])
-      return callback(null, room.messages[lastindex], room)
+    const lastindex = room.currentRound.messages.length-1
+    if (room.currentRound.messages[lastindex])
+      return callback(null, room.currentRound.messages[lastindex], room)
 
     return callback(null, null, room)
   })
@@ -147,25 +157,20 @@ global.fn.addToRoom = function(user, roomcode, callback) {
     }
 
     if (room.open) {
-      if (room.players.length >= 8) {
+
+      if (room.players.size >= 8) {
         const full_error = new Error('The room is already full.')
         full_error.status = 403
         return callback(full_error, room)
       }
 
-      for (var i = 0; i < room.players.length; i++) {
-        if (room.players[i].username == user)
-          return callback(null, room) // User in room already
-      }
+      if (room.players.get(user))
+        return callback(null, room) // User in room already
 
-      room.players.push({
-        username: user,
+      room.players.set(user, {
         reaction: 0,
         score: 0
       })
-
-      if (room.players.length >= 8)
-        room.open = false
 
     } else {
       const closed_error = new Error('Room is already closed.')
@@ -194,7 +199,9 @@ global.fn.closeRoom = function(master, roomcode, callback) {
       return callback(open_error, room)
     }
 
-    if (room.players.length < 4) {
+    console.log(room.players.size)
+
+    if (room.players.size < 4) {
       const size_error = new Error('Room needs at least 4 users.')
       size_error.status = 403
       return callback(size_error, room)
@@ -205,17 +212,33 @@ global.fn.closeRoom = function(master, roomcode, callback) {
   })
 }
 
+global.fn.isMaster = function(master, roomcode, callback) {
+  Room.findById(roomcode, function(err, room) {
+    if (err)
+      return callback(err, false, null)
+
+    if (room.master != master) {
+      const auth_error = new Error('You do not own this room.')
+      auth_error.status = 403
+      return callback(auth_error, false, null)
+    }
+
+    callback(null, true, room)
+  })
+}
+
 global.fn.startRound = function(roomcode, callback) {
   Room.findById(roomcode, function(err, room) {
     if (err)
       return callback(err, room)
 
-    // if (room.open) {
-    //   // Room still open
-    //   return callback(err, room)
-    // }
+    if (room.open || room.currentRound.phase != 1) {
+      const immutable_error = new Error('You can\'t do that action during this phase.')
+      immutable_error.status = 403
+      return callback(immutable_error, null)
+    }
 
-    const players = room.players
+    const playerUsernames = global.fn.mapKeys(room.players)
 
     const deck = room.deck
 
@@ -227,24 +250,26 @@ global.fn.startRound = function(roomcode, callback) {
     var pile = global.gamedata.decks[deck].piles[pileindex].slice(0)
 
     // Choose spy
-    const spyindex = global.fn.randomInt(0,room.players.length-1)
-    // Get spy username
-    const spy = room.players[spyindex].username
+    const spyindex = global.fn.randomInt(0, playerUsernames.length-1)
+    // Get spy usernames
+    const spy = playerUsernames[spyindex]
     // console.log('Select spy: '+spy)
 
     // Create roles object
     const roles = {}
 
     // Iterate players for roles
-    for (var i = 0; i < players.length; i++) {
+    for (var i = 0; i < playerUsernames.length; i++) {
       if (i === spyindex) continue
-
-      console.log(pile)
+      //
+      // console.log(i)
+      //
+      // console.log(pile)
 
       // Get delta deck
       const deckSize = pile.length
       // Get username
-      const user = players[i].username
+      const user = playerUsernames[i]
 
       // If one role is left, assign it to user
       if (deckSize === 1) {
@@ -253,7 +278,7 @@ global.fn.startRound = function(roomcode, callback) {
       }
 
       // Choose random role
-      const roleindex = global.fn.randomInt(0, deck.length-1)
+      const roleindex = global.fn.randomInt(0, deckSize-1)
       // Assign role to user
       roles[user] = pile[roleindex]
 
@@ -262,18 +287,23 @@ global.fn.startRound = function(roomcode, callback) {
 
     }
 
-    room.messages = []
-
     // Update current round
     const current = room.currentRound
-    current.location = pileindex
-    current.roles = roles
     current.dealer = current.number == 0 ? room.master : current.spy
+
     current.spy = spy
-    current.timerStarted = Date.now()
-    current.guessed = false
-    current.suspicious = []
+    current.location = pileindex
     current.number += 1
+    current.willAccuse = []
+    current.hasAccused = []
+    current.phase = 0;
+    current.spyGuessed = false
+    current.roles = roles
+    current.messages = []
+    current.votes = {}
+    current.votingFor = null
+    current.discussion = []
+    current.timerStarted = Date.now()
 
     room.save(callback)
   })
@@ -282,15 +312,15 @@ global.fn.startRound = function(roomcode, callback) {
 global.fn.checkEnded = function(roomcode, callback) {
   Room.findById(roomcode, function(err, room) {
     if (err)
-      return callback(err, room)
+      return callback(err, null, null, null)
 
-    const gameEnds = room.rounds >= room.currentRound.number
+    const gameEnds = room.currentRound.number >= room.rounds
 
     if (!room.currentRound.timerStarted)
-      return callback(null, false, gameEnds)
+      return callback(null, false, gameEnds, room)
 
     const diff = new global.datediff(Date.now(), room.currentRound.timerStarted)
-    callback(null, room.currentRound.guessed|| diff.seconds() > room.roundLength, gameEnds)
+    callback(null, diff.seconds() > room.roundLength, gameEnds, room)
   })
 }
 
@@ -299,13 +329,37 @@ global.fn.questionMessage = function(roomcode, from, to, message, callback) {
     if (err)
       return callback(err, msg_obj)
 
+    if (typeof message != 'string' || message.length == 0) {
+      const type_error = new Error('You need to reply with a message.')
+      type_error.status = 403
+      return callback(type_error, false, room)
+    }
+
+    if (room.open || room.currentRound.phase != 0) {
+      const immutable_error = new Error('You can\'t do that action during this phase.')
+      immutable_error.status = 403
+      return callback(immutable_error, false, room)
+    }
+
     // Here last message should be answered
     if (!msg_obj && from != room.currentRound.dealer || // Asker should be dealer if no question
-      msg_obj && ( typeof msg_obj.answer != 'string' || from != msg_obj.toUsername)) { // Last message should be answered and asker should have answered it
+      msg_obj && ( from != msg_obj.toUsername || typeof msg_obj.answer != 'string')) { // Last message should be answered and asker should have answered it
       // Not authorized error
       const auth_error = new Error('You\'re not authorized to ask.')
       auth_error.status = 403
-      return callback(auth_error, room)
+      return callback(auth_error, false, room)
+    }
+
+    if (msg_obj && msg_obj.fromUsername == to || from == to) {
+      const reject_error = new Error('You shouldn\'t ask back to the person who just asked you.')
+      reject_error.status = 403
+      return callback(reject_error, false, room)
+    }
+
+    if (!room.players.get(to)) {
+      const find_error = new Error('Player in room not found.')
+      find_error.status = 404
+      return callback(find_error, false, room)
     }
 
     const msg_new = {
@@ -314,10 +368,10 @@ global.fn.questionMessage = function(roomcode, from, to, message, callback) {
       toUsername: to
     }
 
-    room.messages.push(msg_new)
+    room.currentRound.messages.push(msg_new)
 
     room.save(function(err, new_room) {
-      callback(err, msg_new)
+      callback(err, msg_new, new_room)
     })
   })
 }
@@ -327,19 +381,75 @@ global.fn.answerMessage = function(roomcode, user, answer, callback) {
     if (err)
       return callback(err, msg_obj)
 
+    if (typeof answer != 'string' || answer.length == 0) {
+      const type_error = new Error('You need to reply with an answer.')
+      type_error.status = 403
+      return callback(type_error, false, room)
+    }
+
+    if (room.open || room.currentRound.phase != 0) {
+      const immutable_error = new Error('You can\'t do that action during this phase.')
+      immutable_error.status = 403
+      return callback(immutable_error, false)
+    }
+
     if (!msg_obj
-      || msg_obj && (typeof msg_obj.answer == 'string' || user != msg_obj.toUsername) ) { // Should not be answered yet and user should answer
+      || msg_obj && (user != msg_obj.toUsername || typeof msg_obj.answer == 'string') ) { // Should not be answered yet and user should answer
       // Not authorized error
       const auth_error = new Error('You\'re not authorized to answer.')
       auth_error.status = 403
-      return callback(auth_error, room)
+      return callback(auth_error, {}, room)
     }
 
     msg_obj.answer = answer
 
     room.save(function(err, new_room) {
-      callback(err, msg_obj)
+      callback(err, msg_obj, new_room)
     })
+  })
+}
+
+global.fn.discussMessage = function(roomcode, user, answer, callback) {
+  Room.findById(roomcode, function(err, room){
+    if (err)
+      return callback(err, null)
+
+    if (typeof answer != 'string' || answer.length == 0) {
+      const type_error = new Error('You need to have a message.')
+      type_error.status = 403
+      return callback(type_error, false, room)
+    }
+
+    if (!room.open || room.currentRound.phase != 4 && room.currentRound.phase != 1) {
+      const immutable_error = new Error('You can\'t do that action during this phase.')
+      immutable_error.status = 403
+      return callback(immutable_error, false)
+    }
+
+    if (!room.players.get(user)) {
+      const find_error = new Error('Player in room not found.')
+      find_error.status = 404
+      return callback(find_error, false, room)
+    }
+
+    if (!room.currentRound.discussion)
+      room.currentRound.discussion = []
+
+    room.currentRound.discussion.push({
+      fromUsername: user,
+      message: answer
+    })
+
+    room.save(callback)
+  })
+}
+
+global.fn.processInterrupts = function(roomcode, beforeSave, callback) {
+  Room.findById(roomcode, function(err, room) {
+
+    beforeSave(err, room.deck, room.currentRound)
+
+    room.save(callback)
   })
 }
 
@@ -350,18 +460,17 @@ global.fn.roomReact = function(roomcode, username, reaction, callback) {
 
     var ack = false
 
-    for (var i=0; i<room.players.length; i++) {
-      if (username == room.players[i].username) {
-        room.players[i].reaction = reaction
-        ack = true
-      }
-    }
+    const player = room.players.get(username)
 
-    if (!ack) {
+    if (!player) {
       const find_error = new Error('Player in room not found.')
       find_error.status = 404
       return callback(find_error, reaction)
     }
+
+    player.reaction = reaction
+
+    room.players.set(username, player)
 
     room.save(function(err, new_room) {
       callback(null, reaction)
@@ -375,17 +484,27 @@ global.fn.userInterrupt = function(roomcode, username, callback) {
     if (err)
       return callback(err, false)
 
-    if (room.currentRound.spy == username) {
-      room.currentRound.guessed = true
+    const isSpy = room.currentRound.spy == username
+
+    if (room.open || room.currentRound.phase != 0) {
+      const immutable_error = new Error('You can\'t do that action during this phase.')
+      immutable_error.status = 403
+      return callback(immutable_error, false)
+    }
+
+    if (isSpy) {
+      if (room.currentRound.spyGuessed) {
+        const done_error = new Error('Player has already initiated.')
+        done_error.status = 403
+        return callback(done_error, false)
+      }
+
+      room.currentRound.spyGuessed = true
     } else {
       // Check if user in room
-      var ack = false
+      const player = room.players.get(username)
 
-      for (var i=0; i<room.players.length; i++)
-        if (username == room.players[i].username)
-          ack = true
-
-      if (!ack) {
+      if (!player) {
         const find_error = new Error('Player in room not found.')
         find_error.status = 404
         return callback(find_error, reaction)
@@ -394,30 +513,43 @@ global.fn.userInterrupt = function(roomcode, username, callback) {
       if (!room.currentRound.suspected)
         room.currentRound.suspected = []
 
-      const suspected = room.currentRound.suspected
+      const hasAccused = room.currentRound.hasAccused
+      const willAccuse = room.currentRound.willAccuse
 
-      if (suspected.indexOf(username) >= 0)
-        return callback(null, false)
+      if (hasAccused.indexOf(username) >= 0) {
+        const done_error = new Error('Player has already done this action in the round.')
+        done_error.status = 403
+        return callback(done_error, false)
+      }
 
-      room.currentRound.suspicious.push(username)
+      if (willAccuse.indexOf(username) >= 0) {
+        const done_error = new Error('Player has already initiated.')
+        done_error.status = 403
+        return callback(done_error, false)
+      }
+
+      room.currentRound.willAccuse.push(username)
     }
 
     room.save(function(err, new_room) {
-      callback(err, true)
+      callback(err, isSpy)
     })
   })
 }
 
 global.fn.insideRoom = function(roomcode, username, callback) {
   Room.findById(roomcode, function(err, room) {
-    var ack = false
-
-    for (var i=0; i<room.players.length; i++) {
-      if (username == room.players[i].username)
-        ack = true
+    if (err)
+      return callback(err, null)
+    if (!room) {
+      const find_error = new Error('Room not found.')
+      find_error.status = 404
+      return callback(find_error, null)
     }
 
-    if (!ack) {
+    const player = room.players.get(username)
+
+    if (!player) {
       const find_error = new Error('Player in room not found.')
       find_error.status = 404
       return callback(find_error, null)
@@ -436,40 +568,215 @@ global.fn.connectRoom = function(roomcode, username, callback) {
     const isMaster = (username == room.master)
 
     const isSpy = (username == room.currentRound.spy)
-    const role = isSpy ? 'spy' : room.currentRound.roles.get(username)
+    const role = isSpy ? 'spy' : (room.currentRound.roles ? room.currentRound.roles.get(username) : '')
     const location = isSpy ? null : room.currentRound.location
 
     var message = null
 
-    const lastindex = room.messages.length-1
-    if (room.messages[lastindex])
-      message = room.messages[lastindex]
+    const lastindex = room.currentRound.messages.length-1
+    if (room.currentRound.messages[lastindex])
+      message = room.currentRound.messages[lastindex]
 
     const newQuestion = !message || message && typeof message.answer == 'string'
-    const needInput = message ? ( message.toUsername == username ) : room.currentRound.dealer == username
+    const needInput = message ? message.toUsername : room.currentRound.dealer
+
+    var initiated = false
+
+    var endgame = null
+    if (room.currentRound.phase == 1) {
+      endgame = {
+        spy: room.currentRound.spy,
+        location: room.currentRound.location,
+        roles: global.fn.mapToObject(room.currentRound.roles)
+      }
+    }
+
+    if (isSpy)
+      initiated = room.currentRound.spyGuessed
+    else {
+      const willAccuse = room.currentRound.willAccuse
+      initiated = willAccuse.indexOf(username) >= 0
+    }
+
+    const piles = global.gamedata.decks[room.deck].piles
+
 
     const stateObject = {
-      input: needInput,
       asked: !newQuestion,
+      deck: room.deck,
+      discussion: room.currentRound.discussion,
       game: {
         role: role,
-        location: location
+        location: location,
+        endgame: endgame
       },
-      open: room.open,
-      number: room.currentRound.number,
-      rounds: room.rounds,
-      username: username,
-      roundLength: room.roundLength,
-      timerStarted: room.currentRound.timerStarted,
-      players: room.players,
-      messages: room.messages,
-      guessed: room.currentRound.guessed,
+      hasAccused: room.currentRound.hasAccused,
+      initiated: initiated,
+      input: needInput,
+      locations: Object.keys(piles),
       master: isMaster,
-      suspicious: room.currentRound.suspicious,
-      deck: room.deck
+      messages: room.currentRound.messages,
+      number: room.currentRound.number,
+      open: room.open,
+      phase: room.currentRound.phase,
+      players: global.fn.mapToObject(room.players),
+      roundLength: room.roundLength,
+      rounds: room.rounds,
+      spyGuessed: room.currentRound.spyGuessed,
+      timerStarted: room.currentRound.timerStarted,
+      username: username,
+      votedBy: room.currentRound.votedBy,
+      votes: room.currentRound.votes ? global.fn.mapToObject(room.currentRound.votes) : {},
+      votingFor: room.currentRound.votingFor
     }
 
     callback(null, stateObject)
+  })
+}
+
+global.fn.voteRoom = function (roomcode, username, guess, callback) {
+  Room.findById(roomcode, function(err, room) {
+    if (err)
+      return callback(err, null)
+
+    const round = room.currentRound
+
+    if (room.open || room.currentRound.phase != 3 || !round.willAccuse || round.willAccuse[0] != username) {
+      const immutable_error = new Error('You can\'t do that action during this phase.')
+      immutable_error.status = 403
+      return callback(immutable_error, null)
+    }
+
+    if (username == guess || !room.players.get(guess) ) {
+      const unvote_error = new Error('You cannot vote for this person.')
+      unvote_error.status = 403
+      return callback(unvote_error, null)
+    }
+
+    room.currentRound.votingFor = guess
+    room.votes = {}
+    room.currentRound.votedBy = username
+
+    room.save(callback)
+  })
+}
+
+global.fn.checkGuess = function(roomcode, username, guess, callback) {
+  Room.findById(roomcode, function(err, room) {
+    if (err)
+      return callback(err, null)
+
+    if (room.open || phase != 2 || room.currentRound.spy != username) {
+      const immutable_error = new Error('You can\'t do that action during this phase.')
+      immutable_error.status = 403
+      return callback(immutable_error, null)
+    }
+
+    callback(null, room.currentRound.location == guess, room)
+  })
+}
+
+global.fn.setCheckVote = function(roomcode, username, vote, callback) {
+  Room.findById(roomcode, function(err, room) {
+    if (err)
+      return callback(err, null)
+
+    if (room.open || room.currentRound.phase != 4) {
+      const immutable_error = new Error('You can\'t do that action during this phase.')
+      immutable_error.status = 403
+      return callback(immutable_error, null)
+    }
+
+    if ( !room.players.get(username) ) {
+      const find_error = new Error('Player in room not found.')
+      find_error.status = 404
+      return callback(find_error, null)
+    }
+
+    if ( room.currentRound.votingFor == username ) {
+      const nope_error = new Error('You cannot vote.')
+      nope_error.status = 403
+      return callback(nope_error, null)
+    }
+
+    if ( room.currentRound.votedBy == username || room.currentRound.votes.get(username) ) {
+      const done_error = new Error('You did already vote.')
+      done_error.status = 403
+      return callback(done_error, null)
+    }
+
+    room.currentRound.votes.set(username, vote)
+
+
+    room.save(function(err, new_room) {
+      if (err)
+        return callback(err, null)
+
+      var allvoted = true
+      var playersTrue = 1
+      const playerSize = new_room.players.size - 1
+
+      for ( const player of new_room.players.keys() ) {
+        if ( player != new_room.currentRound.votedBy && player != new_room.currentRound.votingFor ) {
+          const vote = new_room.currentRound.votes.get(username)
+
+          if ( typeof vote != 'boolean' )
+            allvoted = false
+          else if (vote == true)
+            playersTrue++
+        }
+      }
+
+      const consensus = (playersTrue/playerSize) > global.config.consensus_percent
+      console.log(consensus+' '+(playersTrue/playerSize))
+      callback(null, allvoted, consensus, new_room.currentRound.spy == new_room.currentRound.votingFor, new_room)
+    })
+  })
+}
+
+global.fn.roomScoring = function(roomcode, scoring, callback) {
+  Room.findById(roomcode, function(err, room) {
+    // Check scoring section
+    console.log('calc score')
+    const spyUser = room.currentRound.spy
+    if (scoring == 0 || scoring == 1 || scoring == 4 ) {
+      // Spy win
+      var points = 2
+      if (scoring == 1 || scoring == 4)
+        points += 2
+
+      const spy = room.players.get(spyUser)
+      spy.score += points
+      room.players.set(spyUser, spy)
+    } else {
+      const accuser = room.currentRound.votedBy
+      var points = 1
+
+      const playerKeys = global.fn.mapKeys(room.players)
+      for (var i = 0; i < playerKeys.length; i++) {
+        const player = playerKeys[i]
+        if (player != spyUser) {
+          const obj = room.players.get(player)
+          obj.score += 1
+
+          if (scoring == 3 && player == accuser)
+            obj.score += 1
+
+          room.players.set(player, obj)
+        }
+      }
+    }
+    console.log('sav score')
+    room.save(callback)
+  })
+}
+
+global.fn.roomAccuse = function(roomcode, callback) {
+  Room.findById(roomcode, function(err, room) {
+    room.currentRound.hasAccused = []
+    room.currentRound.willAccuse = global.fn.mapKeys(room.players)
+
+    room.save(callback)
   })
 }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="<%- ((typeof layout !== 'undefined') ? layout : '') %>">
   <head>
     <meta http-equiv="Content-Type" const="text/html;charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,29 +30,16 @@
   </head>
 
   <body>
-
+    <% if (typeof header == 'undefined' || header == true) { %>
     <header>
-      <div class="uk-container">
+      <nav class="uk-navbar-container" uk-navbar>
         <div class="uk-navbar-left">
-          <a class="uk-navbar-item uk-logo" href="/">spyfall.chat</a>
-          <div class="uk-navbar-item">
-              <a href="/messages"><i>Messages</i></a>
-          </div>
-          <div class="uk-navbar-item">
-              <a href="/game"><i>Game</i></a>
-          </div>
+          <ul class="uk-navbar-nav">
+            <li><a class="uk-navbar-item uk-logo" href="/">spyfall.chat</a></li>
+            <% include menu.ejs %>
+          </ul>
         </div>
-        <div class="uk-navbar-right">
-          <div class="uk-navbar-item">
-              <a href="/signin"><i>Sign In</i></a>
-          </div>
-          <div class="uk-navbar-item">
-              <a href="/signup"><i>Sign Up</i></a>
-          </div>
-          <div class="uk-navbar-item">
-              <a href="/open"><i>Join</i></a>
-          </div>
-        </div>
-      </div>
+      </nav>
     </header>
-    <div class="uk-container">
+    <% } %>
+    <div class="uk-container game-stretch">

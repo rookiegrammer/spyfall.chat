@@ -9,6 +9,7 @@ const memoji = [
   '🤓'
 ]
 
+
 class MessageBox extends React.Component {
   constructor(props) {
     super(props);
@@ -120,31 +121,38 @@ class SpyfallGameBox extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      console: null,
       connected: false,
       roomcode: '',
       target: '',
       text: '',
-      discuss: false,
+      toggleMessages: false,
       // Served and Provided
-      voting: false,
-      input: false,
       asked: true,
+      deck: '',
+      discussion: [],
       game: {
         role: '',
         location: ''
       },
-      open: true,
-      number: '',
-      rounds: '',
-      username: '',
-      roundLength: '',
-      timerStarted: '',
-      players: [],
-      messages: [],
-      guessed: false,
+      hasAccused: [],
+      initiated: false,
+      input: false,
+      locations: [],
       master: false,
-      suspicious: [],
-      deck: ''
+      messages: [],
+      number: 0,
+      open: true,
+      phase: 0,
+      players: {},
+      roundLength: 540,
+      rounds: 8,
+      spyGuessed: false,
+      timerStarted: '',
+      username: '',
+      votedBy: '',
+      votes: {},
+      votingFor: ''
     }
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -168,6 +176,17 @@ class SpyfallGameBox extends React.Component {
     this.reactButtons = rmojis
   }
 
+  displayError = (error) => {
+    console.log(error)
+    if (error) {
+      UIkit.notification({message: error.message ? error.message : 'Server did not accept inputs.', pos: 'top-center'})
+      // this.setState({console: error.message ? error.message : 'Server did not accept inputs.'})
+    } else {
+      UIkit.notification({message: 'Server denied your request.'})
+      // this.setState({console: })
+    }
+  }
+
   socketHandlers = () => {
     /*
     PUBLIC
@@ -179,9 +198,38 @@ class SpyfallGameBox extends React.Component {
     suspicion_raised game
     spy_guessed game
     player_joined game
+    -
+    change_phase game
+    ended game
+    force_reload game
+    update_players game
+    votes_succeed game
+    votes_failed game
+    take_votes game
+    round_end game
+    discussed game
     */
     this.socket.on('round_start game', (date) => {
-      this.setState({timerStarted: date})
+      this.setState({
+        asked: false,
+        discussion: [],
+        game: {
+          role: '',
+          location: ''
+        },
+        hasAccused: [],
+        initiated: false,
+        input: false,
+        messages: [],
+        number: this.state.number + 1,
+        phase: 0,
+        spyGuessed: false,
+        timerStarted: date,
+        votedBy: '',
+        votes: {
+        },
+        votingFor: ''
+      })
     })
     this.socket.on('question_asked game', (msg_new) => {
       var msgs = this.state.messages.concat(msg_new)
@@ -196,20 +244,15 @@ class SpyfallGameBox extends React.Component {
       this.setState({ messages: this.state.messages })
     })
     this.socket.on('reacted game', (username, reaction) => {
-      for (var i = 0; i < this.state.players.length; i++) {
-        if (this.state.players[i].username == username) {
-          this.state.players[i].reaction = reaction ? reaction : 0
-        }
-      }
-
+      this.state.players[username].reaction = reaction
       this.setState({
         players: this.state.players
       })
     })
     this.socket.on('player_joined game', (user) => {
-      const players = this.state.players.concat({username: user, score: 0, reaction: 0})
+      this.state.players[user] = {score: 0, reaction: 0}
       this.setState({
-        players: players
+        players: this.state.players
       })
     })
     this.socket.on('started game', () => {
@@ -217,35 +260,100 @@ class SpyfallGameBox extends React.Component {
         open: false
       })
     })
-    /*
-    PRIVATE
-    take_answer game
-    take_question game
-    give_role game
-    take_interrupt game
-    */
-    this.socket.on('take_question game', () => {
+    this.socket.on('initiated game', (isSpy) => {
+      if (isSpy)
+        this.setState({
+          spyGuessed: true
+        })
+    })
+    this.socket.on('change_phase game', (phase) => {
+      this.setState({phase: phase})
+    })
+    this.socket.on('ended game', () => {
+      console.log('DIE')
+    })
+    this.socket.on('force_reload game', () => {
+      this.connectGame()
+    })
+    this.socket.on('update_players game', (players) => {
+      this.setState({players: players})
+    })
+    this.socket.on('votes_succeed game', () => {
+      this.setState({
+        votedBy: '',
+        votingFor: '',
+        votes: {}
+      })
+    })
+    this.socket.on('votes_failed game', () => {
+      this.setState({
+        votedBy: '',
+        votingFor: '',
+        votes: {}
+      })
+    })
+    this.socket.on('has_voted game', (username, vote) => {
+      const votes = this.state.votes
+      votes[username] = vote
+      this.setState({votes: votes})
+    })
+    this.socket.on('take_votes game', (username, guess) => {
+      console.log(username, guess)
+      this.setState({
+        votedBy: username,
+        votingFor: guess,
+        votes: {}
+      })
+    })
+    this.socket.on('take_question game', (user) => {
       console.log('hey')
       this.setState({
-        input: true,
+        input: user,
         asked: false
       })
     })
-    this.socket.on('take_answer game', () => {
+
+    this.socket.on('take_answer game', (user) => {
       console.log('answer')
       this.setState({
-        input: true,
+        input: user,
         asked: true
       })
     })
+    this.socket.on('round_end game', (location, spy, role) => {
+      const game = this.state.game
+      game.endgame = {
+        spy: spy,
+        location: location,
+        roles: role
+      }
+      this.setState({game: game})
+    })
+    this.socket.on('discussed game', (username, message) => {
+      this.state.discussion.push({
+        fromUsername: username,
+        message: message
+      })
+      this.setState({discussion: this.state.discussion})
+    })
+    /*
+    PRIVATE
+    give_role game
+    take_location game
+    take_suspicion game
+    */
     this.socket.on('give_role game', (obj) => {
       console.log(obj)
       this.setState({
         game: obj
       })
     })
-    this.socket.on('take_interrupt game', () => {
-
+    this.socket.on('take_location game', (deck) => {
+      console.log('WHICH')
+    })
+    this.socket.on('take_suspicion game', () => {
+      this.setState({votedBy: this.state.username})
+      console.log('WHO')
     })
   }
 
@@ -262,14 +370,10 @@ class SpyfallGameBox extends React.Component {
   reactGame = (emoji) => {
 
     this.socket.emit('react game', this.state.roomcode, emoji, (ack) => {
-      if (ack != true) return
+      if (ack != true) return this.displayError(ack)
 
       const players = this.state.players
-
-      for (var i = 0; i<players.length; i++) {
-        if (players[i].username == this.state.username)
-          players[i].reaction = emoji
-      }
+      this.state.players[this.state.username].reaction = emoji
 
       this.setState({players: players})
     })
@@ -278,8 +382,15 @@ class SpyfallGameBox extends React.Component {
   startGame = () => {
     const roomcode = this.state.roomcode+''
     this.socket.emit('start game', roomcode, (ack) => {
-      if (ack != true) return
+      if (ack != true) return this.displayError(ack)
       this.setState({open: false})
+    })
+  }
+
+  newGame = () => {
+    const roomcode = this.state.roomcode+''
+    this.socket.emit('new game', roomcode, (ack) => {
+      if (ack != true) return this.displayError(ack)
     })
   }
 
@@ -287,17 +398,57 @@ class SpyfallGameBox extends React.Component {
     const roomcode = this.state.roomcode+''
 
     this.socket.emit('load game', roomcode, (obj) => {
+      if (obj == false) return this.displayError(obj)
       console.log(obj)
       this.setState(obj)
       this.socket.emit('open game', roomcode, (ack) => {
-        if (ack !== true) return
+        if (ack != true) return this.displayError(ack)
         this.setState({connected: true})
       })
     })
   }
 
+  initiateGame = () => {
+    const roomcode = this.state.roomcode+''
+
+    this.socket.emit('initiate game', roomcode, (ack) => {
+      if (ack != true) return this.displayError(ack)
+      this.setState({
+        initiated: true
+      })
+    })
+  }
+
+  suspectGame = () => {
+    const roomcode = this.state.roomcode+''
+
+    this.socket.emit('suspect game', roomcode, this.state.votingFor, (ack) => {
+      if (ack != true) return this.displayError(ack)
+    })
+  }
+
+  voteGame = (vote) => {
+    const roomcode = this.state.roomcode+''
+    this.socket.emit('vote game', roomcode, vote, (ack) => {
+      if (ack != true) return this.displayError(ack)
+    })
+  }
+
+  discussGame = () => {
+    const roomcode = this.state.roomcode+''
+    const message = this.state.text
+    this.socket.emit('discuss game', roomcode, message, (ack) => {
+      if (ack != true) return this.displayError(ack)
+      this.state.discussion.push({
+        fromUsername: this.state.username,
+        message: message
+      })
+      this.setState({discussion: this.state.discussion})
+    })
+  }
+
   sendQuery = () => {
-    if (!this.state.input) return
+    if (this.state.input !== this.state.username) return
 
     const roomcode = this.state.roomcode+''
 
@@ -306,6 +457,8 @@ class SpyfallGameBox extends React.Component {
 
       if (answer)
         this.socket.emit('answer game', roomcode, answer, (ack) => {
+          if (ack != true) return this.displayError(ack)
+
           const len = this.state.messages.length
 
           if (ack !== true || len == 0) return
@@ -320,7 +473,7 @@ class SpyfallGameBox extends React.Component {
 
       if (question)
         this.socket.emit('question game', roomcode, user, question, (ack) => {
-          if (ack !== true) return
+          if (ack != true) return this.displayError(ack)
 
           const msg_obj = {
             fromUsername: this.state.username,
@@ -329,26 +482,37 @@ class SpyfallGameBox extends React.Component {
             answer: null
           }
           var added = this.state.messages.concat(msg_obj)
-          this.setState({ messages: added, input: false, text: '' })
+          this.setState({ messages: added, input: null, text: '' })
         })
     }
   }
 
   targetBox = () => {
     const targets = []
-    for (var i = 0; i < this.state.players.length; i++) {
-      const player = this.state.players[i]
-      if (player.username != this.state.username) {
+
+    var lastAsker = null
+    if (this.state.phase != 3) {
+      const messages = this.state.messages
+      if (messages.length != 0)
+        lastAsker = messages[messages.length-1].fromUsername
+    }
+
+    const playerKeys = Object.keys(this.state.players)
+
+    for (var i = 0; i < playerKeys.length; i++) {
+      const player = playerKeys[i]
+      if (player != this.state.username && player != lastAsker) {
         targets.push(
-          <option key={player.username} value={player.username}>
-            {player.username}
+          <option key={player} value={player}>
+            {player}
           </option>
         )
       }
 
     }
+    const voting = this.state.phase == 3
     return (
-      <select className="uk-select" name="target" onChange={this.handleInputChange} value={this.state.target}>
+      <select className="uk-select" name={ voting ? "votingFor" : "target"} onChange={this.handleInputChange} value={voting ? this.state.votingFor : this.state.target}>
         <option>-- Select One --</option>
         {targets}
       </select>
@@ -356,62 +520,109 @@ class SpyfallGameBox extends React.Component {
   }
 
   inputBox = () => {
-    const input = <div>You will {this.state.asked ? 'answer' : 'question'}.</div>
+    const phase = this.state.phase
+    const s = {
+      normal: phase == 0,
+      voting: phase == 3,
+      finding: phase == 2 && this.state.game.role == 'spy',
+      setvote: phase == 3 && this.state.votedBy == this.state.username,
+      questioning: phase == 0 && this.state.input == this.state.username && !this.state.asked,
+      asked: this.state.asked,
+      discuss: phase == 4,
+      queried: phase == 0 && this.state.input == this.state.username,
+      compliance: phase == 4 && this.state.username != this.state.votingFor && this.state.username != this.state.votedBy
+    }
     return (
       <div>
-        { input }
-        { this.state.asked ? '' : this.targetBox() }
-        <input className="uk-input uk-margin" type="text" name="text" onChange={this.handleInputChange} value={this.state.text} placeholder={this.state.asked ? 'Answer' : 'Question'} />
-        <button onClick={this.sendQuery} className="uk-button uk-button-secondary">{this.state.asked ? 'Reply' : 'Ask'}</button>
+        {   (s.queried || s.setvote) &&
+            <div>You will {s.setvote ? 'vote' : (s.asked ? 'answer' : 'question')}.</div>
+        }
+        { ((s.setvote) || (s.questioning)) &&
+          this.targetBox()
+        }
+        { ((s.queried) || (s.discuss)) &&
+          <input className="uk-input uk-margin" type="text" name="text" onChange={this.handleInputChange} value={this.state.text} placeholder={ s.queried ? (s.asked ? 'Answer' : 'Question') : 'Discuss'} />
+        }
+        { (s.queried  || s.setvote || s.discuss ) &&
+          <button onClick={s.queried ? this.sendQuery : (s.setvote ? this.suspectGame : this.discussGame ) } className="uk-button uk-button-secondary uk-margin-small-top uk-margin-small-bottom">{ s.queried ? (s.asked ? 'Reply' : 'Ask') : (s.voting ? 'Vote' : 'Send') }</button>
+        }
+        {   s.compliance &&
+          <span className="uk-margin-small-top uk-margin-small-bottom uk-display-inline-block">
+            <button onClick={() => {this.voteGame(true)}} className="uk-button uk-button-secondary uk-margin-left">Agree</button>
+            <button onClick={() => {this.voteGame(false)}} className="uk-button uk-button-secondary uk-margin-small-left">Disagree</button>
+          </span>
+        }
       </div>
     )
   }
 
   roleBox = () => {
-    const spy = this.state.game.role == 'spy'
-    const role = <h1>You are the {spy ? 'Spy' : this.state.game.role}!</h1>
-    const location = <div>The location is the {this.state.game.location}.</div>
+    var heading = '';
+    var subtext = '';
+    var alignrt = '';
+    const alt = this.state.phase == 1
+    if (alt) {
+      if (!this.state.game.endgame) return ''
+      const endgame = this.state.game.endgame
+
+      heading = 'Location is the '+endgame.location
+      subtext = endgame.spy + ' is the Spy! '
+
+      Object.keys(endgame.roles).forEach(function(key) {
+        subtext += key + ' is the ' + endgame.roles[key] + '. '
+      });
+
+    } else {
+      const spy = this.state.game.role == 'spy'
+      const alreadyAccused = !spy && this.state.hasAccused.indexOf(this.state.username) >= 0;
+      heading = 'You are the '+ (spy ? 'Spy' : this.state.game.role) +'!'
+      subtext = spy ? '' : <div>The location is the {this.state.game.location}.</div>
+      alignrt = (alreadyAccused || this.state.phase != 0) ? '' : <button className="uk-button uk-button-primary game-initiate" disabled={this.state.initiated} onClick={this.initiateGame}>Initiate {spy?'Guess':'Suspicion'}</button>
+    }
+
     return (
-      <div className="uk-card uk-card-primary uk-card-body uk-text-center uk-margin-top">
-        {role}
-        {spy ? '' : location}
+      <div className={"role-box uk-text-left uk-card uk-card-primary uk-padding-small uk-card-body"+(alt?' alter':'')}>
+        <span className="uk-align-right">{alignrt}</span>
+        <h2 className="uk-text-bold no-margin">{heading}</h2>
+        { subtext }
       </div>
     )
+
 
   }
 
   playersBox = () => {
     const box = []
     const players = this.state.players
+    const playerKeys = Object.keys(players)
 
-    for (var i = 0; i < players.length; i++) {
-      const player = players[i]
-      const username = player.username ? player.username : '_'
-      const label = (player.username.charAt(0)+'').toUpperCase()
-      const moji = memoji[player.reaction]
+    for (var i = 0; i < playerKeys.length; i++) {
+      const player = playerKeys[i]
+      const label = player ? (player.charAt(0)+'').toUpperCase() : '_'
+      const moji = memoji[players[player].reaction]
       const expression = twemoji.parse(moji ? moji : memoji[0],{
         size: 72
       })
 
-      const isUser = players[i].username == this.state.username
+      const isUser = player == this.state.username
 
       box.push(
-        <div className="player-profile uk-text-center uk-display-inline-block" key={player.username} data-username={player.username}>
+        <div className="player-profile uk-text-center" key={player} data-username={player}>
           <div className={'player-avatar'+(isUser?' player-user':'')}><div className="player-label">{label}</div></div>
-          <div uk-drop="pos: bottom-center">
+          <div uk-drop="pos: right-center">
             <div className="uk-card uk-card-body uk-card-default">
               {
                 !isUser &&
                 <div className="player-meta uk-margin-small-bottom">
                   <div className="uk-text-meta">Player Username</div>
-                  <div className="uk-text-lead uk-text-bold">{player.username}</div>
+                  <div className="uk-text-lead uk-text-bold">{player}</div>
                 </div>
               }
               {
                 !this.state.open &&
                 <div>
                   <div className="uk-text-meta">{isUser?'Your':'Player'} Score</div>
-                  <div className="uk-text-lead uk-text-bold">{player.score}</div>
+                  <div className="uk-text-lead uk-text-bold">{players[player].score}</div>
                 </div>
               }
               {
@@ -427,7 +638,7 @@ class SpyfallGameBox extends React.Component {
       )
     }
 
-    return (<div className="player-box uk-flex uk-flex-center">{box}</div>)
+    return box
 
   }
 
@@ -435,7 +646,7 @@ class SpyfallGameBox extends React.Component {
     const messages = []
 
     if (this.state.messages)
-      for (var i = 0; i < this.state.messages.length; i++) {
+      for (var i = this.state.messages.length-1; i >= 0; i--) {
         const obj = this.state.messages[i]
 
         const interviewer = (obj.fromUsername == this.state.username) ? 'You' : obj.fromUsername
@@ -449,35 +660,63 @@ class SpyfallGameBox extends React.Component {
           </div>)
       }
 
-    return (<div className="uk-card uk-card-body uk-card-secondary uk-card-hover uk-text-center"> {messages.length != 0?messages:'No Messages :\'('} </div>)
+    return (<div className="game-messages uk-card uk-card-body uk-card-secondary uk-card-hover uk-text-center"> {messages.length != 0?messages:'No Messages :\'('} </div>)
   }
+
+  showMenu = () => {
+    UIkit.offcanvas($('#offcanvas-overlay')).show()
+  }
+
+  // { this.state.master && this.state.open &&
+  //   <button onClick={this.startGame} className="uk-button uk-button-primary">Temp Start Button</button>
+  // }
+
+  // {
+  //   !this.state.open &&
+  //   <div className="game-flex-col">
+  //     {this.roleBox()}
+  //     <div className="uk-margin-small game-qa game-scr-col">{this.messageBox()} </div>
+  //     {( this.state.phase == 0 && this.state.input == this.state.username || this.state.phase == 4) ? this.inputBox() : ''}
+  //     { this.state.phase == 3 && this.votingBox()}
+  //   </div>
+  // }
+
 
   render() {
     return (
-      <div className="game uk-padding uk-padding-remove-horizontal">
-        <div className="game-box">
-          {this.state.connected ?
-            <div>
-              {this.playersBox()}
-              { this.state.master && this.state.open &&
-                <button onClick={this.startGame} className="uk-button uk-button-primary">Temp Start Button</button>
-              }
-              {
-                !this.state.open &&
-                <div>
-                  {this.roleBox()}
-                  <div className="uk-margin game-qa">{this.messageBox()} </div>
-                  {this.state.input ? this.inputBox() : ''}
-                </div>
-              }
-              <div className="uk-text-right uk-text-meta">User: <code>{this.state.username}</code> | Room: <code>{this.state.roomcode}</code></div>
-            </div>
-            : <div>
-                <input className="uk-input uk-margin" type="text" id="roomcode" onChange={this.handleInputChange} placeholder="Room Code" name="roomcode" value={this.state.roomcode} />
-                <button onClick={this.connectGame} className="uk-button uk-button-primary">Connect</button>
+      <div className="game game-flex-col uk-padding uk-padding-remove-horizontal">
+        {this.state.connected ?
+          <div className="game-box game-flex-row">
+            <div className="player-box uk-padding-small uk-padding-remove-vertical uk-padding-remove-left">
+              <div className="uk-text-center uk-margin-bottom" key={'menu'}>
+                <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
               </div>
-          }
-        </div>
+              {this.playersBox()}
+            </div>
+            <div className="game-var-row">
+              <div className="game-flex-col uk-margin-small">
+                {
+                  !this.state.open &&
+                  <div className="game-flex-col">
+                    { this.roleBox() }
+                    <div className="uk-margin-small game-qa game-scr-col">
+                      { this.messageBox()}
+                    </div>
+                    { this.inputBox() }
+                  </div>
+                }
+                { this.state.master && (this.state.open || this.state.phase == 1) &&
+                  <button onClick={this.state.number == 0 ? this.startGame : this.newGame} className="uk-button uk-button-primary">{this.state.number == 0 ? 'Start' : 'Proceed'}</button>
+                }
+                <div className="uk-text-right uk-text-meta uk-margin-small">User: <code>{this.state.username}</code> | Room: <code>{this.state.roomcode}</code></div>
+              </div>
+            </div>
+          </div>
+          : <div className="game-box game-scr-col">
+              <input className="uk-input uk-margin" type="text" id="roomcode" onChange={this.handleInputChange} placeholder="Room Code" name="roomcode" value={this.state.roomcode} />
+              <button onClick={this.connectGame} className="uk-button uk-button-primary">Connect</button>
+            </div>
+        }
       </div>
     )
   }

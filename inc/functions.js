@@ -54,3 +54,23 @@ $.fn.getRandomPile = (deck) => {
 
   return pilesKeys[index]
 }
+
+$.fn.mapToObject = (mmap) => {
+  const obj = {};
+
+  for (const key of mmap.keys()) {
+    obj[key] = mmap.get(key)
+  }
+
+  return obj
+}
+
+$.fn.mapKeys = (mmap) => {
+  const arr = []
+
+  for (const key of mmap.keys()) {
+    arr.push(key)
+  }
+
+  return arr
+}

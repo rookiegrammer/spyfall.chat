@@ -1,11 +1,19 @@
-<% include partials/head %>
+<%- include('partials/head', {layout: 'in-game', header: false}) %>
 
-<div id="game-container">
+<div id="game-container" class="game-stretch">
 
 </div>
 
-<script src="/js/material-ui.production.min.js"></script>
-<script src="/client-components.js"></script>
+<div id="offcanvas-overlay" uk-offcanvas="overlay: true">
+  <div class="uk-offcanvas-bar">
+    <button class="uk-offcanvas-close" type="button" uk-close></button>
+    <h3>spyfall.chat</h3>
+    <ul class="uk-nav uk-nav-primary">
+      <%- include('partials/menu.ejs') %>
+    </ul>
+  </div>
+</div>
+
 <script>
   const domContainer = document.querySelector('#game-container');
   ReactDOM.render(React.createElement(SpyfallGameBox), domContainer);
