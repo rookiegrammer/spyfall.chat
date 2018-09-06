@@ -141,14 +141,19 @@ html.in-game {
     overflow-y: auto;
   }
 
+  .game-locations {
+    line-height: 3;
+  }
+
   .game-var-row {
-    flex: 1 0 auto;
+    flex: 1 0 0;
     flex-direction: column;
     display: flex;
   }
 
   .player-box {
     overflow-y: auto;
+    flex-shrink: 0;
   }
 
   .game-initiate:disabled {
@@ -157,6 +162,10 @@ html.in-game {
       color: $global-inverse-color;
       cursor: not-allowed;
     }
+  }
+
+  .game-locations {
+    max-width: 100%;
   }
 
   .no-margin {
@@ -186,29 +195,30 @@ html.in-game {
       height: 0;
       opacity: 1;
     }
-    70%   {
-      opacity: 0.9;
+    50%   {
+      opacity: 0.7;
     }
     100% {
-      width: 3em;
-      height: 3em;
+      width: 2.3em;
+      height: 2.3em;
       opacity: 0;
     }
 }
 
 .player-reaction {
   position: relative;
+  z-index: 2;
   &.show::before {
-    z-index: 0;
+    z-index: -1;
     content: ' ';
     border-radius: 50%;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: $global-secondary-background;
+    background-color: $global-primary-background;
     animation-name: showemoji;
-    animation-duration: 1s;
+    animation-duration: 500ms;
     animation-timing-function: ease-out;
   }
 }

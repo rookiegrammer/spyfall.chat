@@ -4231,11 +4231,15 @@ html.in-game .game-flex-row { display: -webkit-box; display: -ms-flexbox; displa
 
 html.in-game .game-scr-col { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; overflow-y: auto; }
 
-html.in-game .game-var-row { -webkit-box-flex: 1; -ms-flex: 1 0 auto; flex: 1 0 auto; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; display: -webkit-box; display: -ms-flexbox; display: flex; }
+html.in-game .game-locations { line-height: 3; }
 
-html.in-game .player-box { overflow-y: auto; }
+html.in-game .game-var-row { -webkit-box-flex: 1; -ms-flex: 1 0 0px; flex: 1 0 0; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; display: -webkit-box; display: -ms-flexbox; display: flex; }
+
+html.in-game .player-box { overflow-y: auto; -ms-flex-negative: 0; flex-shrink: 0; }
 
 html.in-game .game-initiate:disabled, html.in-game .game-initiate:disabled:hover, html.in-game .game-initiate:disabled:active { background-color: #222; color: #fff; cursor: not-allowed; }
+
+html.in-game .game-locations { max-width: 100%; }
 
 html.in-game .no-margin { margin: 0 !important; }
 
@@ -4250,21 +4254,21 @@ html.in-game .no-margin { margin: 0 !important; }
 @-webkit-keyframes showemoji { 0% { width: 0;
     height: 0;
     opacity: 1; }
-  70% { opacity: 0.9; }
-  100% { width: 3em;
-    height: 3em;
+  50% { opacity: 0.7; }
+  100% { width: 2.3em;
+    height: 2.3em;
     opacity: 0; } }
 
 @keyframes showemoji { 0% { width: 0;
     height: 0;
     opacity: 1; }
-  70% { opacity: 0.9; }
-  100% { width: 3em;
-    height: 3em;
+  50% { opacity: 0.7; }
+  100% { width: 2.3em;
+    height: 2.3em;
     opacity: 0; } }
 
-.player-reaction { position: relative; }
+.player-reaction { position: relative; z-index: 2; }
 
-.player-reaction.show::before { z-index: 0; content: ' '; border-radius: 50%; position: absolute; top: 50%; left: 50%; -webkit-transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%); background-color: #222; -webkit-animation-name: showemoji; animation-name: showemoji; -webkit-animation-duration: 1s; animation-duration: 1s; -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; }
+.player-reaction.show::before { z-index: -1; content: ' '; border-radius: 50%; position: absolute; top: 50%; left: 50%; -webkit-transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%); background-color: #1e87f0; -webkit-animation-name: showemoji; animation-name: showemoji; -webkit-animation-duration: 500ms; animation-duration: 500ms; -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; }
 
 /*# sourceMappingURL=client-theme.css.map */

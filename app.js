@@ -68,15 +68,16 @@ global.sck.msg.use(socketSession)
 
 http.listen(3000);
 
-// on join add roomid to session
-// on /game allow join interface
-
-// session object
-//  session.username
-//  session.rooms
-//  session.round_role
-
 global.sck.game.on('connection', (socket) => {
+  /*
+    Game Phases
+    Phase 0: QA Phase
+    Phase 1: After Round Phase
+    Phase 2: Spy Guessing Phase
+    Phase 3: Accusation Phase
+    Phase 4: Tribunal Phase
+  */
+
   const space = global.sck.game
 
   const checkUser = function() {
@@ -159,22 +160,16 @@ global.sck.game.on('connection', (socket) => {
       global.fn.checkEnded(roomcode, function(err, round, game, room) {
         if (err) return
 
-        console.log('ended')
-        if (game) {
+        room.currentRound.phase = 1
+        room.save(function(err, new_room) {
+          if (err) return
+          const lround = new_room.currentRound
+          space.in(roomcode).emit('round_end game', lround.location, lround.spy, global.fn.mapToObject(lround.roles))
+          space.in(roomcode).emit('change_phase game', 1)
+        })
+
+        if (game)
           wrapUp(roomcode)
-          console.log('gamewrap')
-        } else {
-          room.currentRound.phase = 1
-          room.save(function(err, new_room) {
-            if (err) return
-            const lround = new_room.currentRound
-            space.in(roomcode).emit('round_end game', lround.location, lround.spy, global.fn.mapToObject(lround.roles))
-            space.in(roomcode).emit('change_phase game', 1)
-          })
-          // makeRound(roomcode, function(err) {
-          //   console.log(err)
-          // })
-        }
       })
     })
   }
@@ -251,20 +246,16 @@ global.sck.game.on('connection', (socket) => {
                   if (err) return
                   space.in(roomcode).emit('update_players game', global.fn.mapToObject(new_room.players) )
 
+                  new_room.currentRound.phase = 1
+                  new_room.save(function(err, newnew_room) {
+                    if (err) return
+                    const lround = newnew_room.currentRound
+                    space.in(roomcode).emit('round_end game', lround.location, lround.spy, global.fn.mapToObject(lround.roles))
+                    space.in(roomcode).emit('change_phase game', 1)
+                  })
+
                   if (game)
                     wrapUp(roomcode)
-                  else {
-                    new_room.currentRound.phase = 1
-                    new_room.save(function(err, newnew_room) {
-                      if (err) return
-                      const lround = newnew_room.currentRound
-                      space.in(roomcode).emit('round_end game', lround.location, lround.spy, global.fn.mapToObject(lround.roles))
-                      space.in(roomcode).emit('change_phase game', 1)
-                    })
-                    // makeRound(roomcode, function(err) {
-                    //   console.log(err)
-                    // })
-                  }
                 })
               else {
                 // recover last answerer

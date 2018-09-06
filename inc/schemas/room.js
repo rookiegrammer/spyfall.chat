@@ -232,10 +232,16 @@ global.fn.startRound = function(roomcode, callback) {
     if (err)
       return callback(err, room)
 
-    if (room.open || room.currentRound.phase != 1) {
+    if (room.open || room.currentRound.number != 0 && room.currentRound.phase != 1) {
       const immutable_error = new Error('You can\'t do that action during this phase.')
       immutable_error.status = 403
       return callback(immutable_error, null)
+    }
+
+    if (room.currentRound.number >= room.rounds) {
+      const finish_error = new Error('The game is already finished.')
+      finish_error.status = 403
+      return callback(finish_error, null)
     }
 
     const playerUsernames = global.fn.mapKeys(room.players)
@@ -286,6 +292,8 @@ global.fn.startRound = function(roomcode, callback) {
       pile.splice(roleindex, 1)
 
     }
+
+    console.log(roles)
 
     // Update current round
     const current = room.currentRound
@@ -420,7 +428,7 @@ global.fn.discussMessage = function(roomcode, user, answer, callback) {
       return callback(type_error, false, room)
     }
 
-    if (!room.open || room.currentRound.phase != 4 && room.currentRound.phase != 1) {
+    if (!room.open && room.currentRound.phase != 4 && room.currentRound.phase != 1) {
       const immutable_error = new Error('You can\'t do that action during this phase.')
       immutable_error.status = 403
       return callback(immutable_error, false)
@@ -672,7 +680,7 @@ global.fn.checkGuess = function(roomcode, username, guess, callback) {
       return callback(immutable_error, null)
     }
 
-    callback(null, room.currentRound.location == guess, room)
+    callback(null, room.currentRound.location.toLowerCase() == guess.toLowerCase(), room)
   })
 }
 

@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>spyfall.chat</title>
 
+    <link rel="stylesheet" href="/css/jquery-ui.min.css">
     <link rel="stylesheet" href="/css/client-theme.css">
 
     <script src="/js/jquery-latest.min.js"></script>
 
     <script src="/js/twemoji.min.js"></script>
+
+    <script src="/js/jquery-ui.min.js"></script>
 
     <script src="/js/uikit.min.js"></script>
     <script src="/js/uikit-icons.min.js"></script>
@@ -29,7 +32,7 @@
     <script src="/client-app.js"></script>
   </head>
 
-  <body>
+  <body id="body">
     <% if (typeof header == 'undefined' || header == true) { %>
     <header>
       <nav class="uk-navbar-container" uk-navbar>
