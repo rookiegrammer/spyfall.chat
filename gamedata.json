@@ -1,9 +1,10 @@
 {
   "version": "1.1",
+  "default": "Spyfall 1",
   "decks": {
-    "default" : {
-      "name" : "",
+    "Spyfall 1" : {
       "author": "",
+      "descritpion": "",
       "piles" : {
         "Airplane": ["1st Class Passenger", "Air Marshal", "Mechanic", "Coach Passenger", "Flight Attendant", "Co-Pilot", "Captain"],
         "Bank": ["Armored Car Driver", "Bank Manager", "Loan Consultant", "Bank Robber", "Customer", "Security Guard", "Bank Teller"],
@@ -32,6 +33,30 @@
         "Supermarket": ["Customer", "Cashier", "Butcher", "Janitor", "Produce Manager", "Food Sample Demo", "Shelf Stocker"],
         "Theater": ["Coat Check", "Cue Card Prompter", "Ticket Office Cashier", "Thearer Visitor", "Director", "Actor", "Crewman"],
         "University": ["Graduate Student", "Professor", "Dean", "Psychologist", "Maintenance Man", "Student", "Advisor"]
+      }
+    },
+    "Spyfall 2" : {
+      "piles" : {
+        "Track": ["Owner", "Driver", "Engineer", "Spectator", "Referee", "Mechanic", "Food Vendor"],
+        "Museum": ["Ticket Seller", "Student", "Tourist", "Teacher", "Security Guard", "Painter", "Art Collector"],
+        "Vineyard": ["Gardener", "Gourmet Guide", "Winemaker", "Exporter", "Butler", "Wine Taster", "Sommelier"],
+        "Baseball Stadium": ["Pitcher", "Catcher", "Commentator", "Spectator", "Umpire", "Food Vendor", "Security Guard"],
+        "Library": ["Old Man", "Journalist", "Author", "Volunteer", "Student", "Librarian", "Nerd"],
+        "Cat Show": ["Judge", "Cat Trainer", "Veterinarian", "Animal Lover", "Cat Owner", "Cat", "Crazy Cat Lady"],
+        "Retirement Home": ["Relative", "Nurse", "Janitor", "Blind Person", "Old Person", "Psychologist", "Cook"],
+        "Jail": ["Wrongly Accused Man", "Guard", "CCTV Operator", "Visitor", "Lawyer", "Criminal", "Janitor"],
+        "Construction Site": ["Contractor", "Crane Driver", "Trespasser", "Electrician", "Engineer", "Architect", "Construction Worker"],
+        "The United Nations": ["Diplomat", "Interpreter", "Napping Delegate", "Speaker", "Secretary-General", "Tourist", "Journalist"],
+        "Candy Factory": ["Candy Maker", "Pastry Chef", "Visitor", "Taster", "Supply Worker", "Inspector", "Machine Operator"],
+        "Subway": ["Tourist", "Subway Operator", "Ticket Inspector", "Pregnant Lady", "Pickpocket", "Ticket Seller", "Businessman"],
+        "Coal Mine": ["Safety Inspector", "Miner", "Overseer", "Dump Truck Operator", "Driller", "Blasting Engineer", "Worker"],
+        "Cemetery": ["Priest", "Grave Robber", "Poet", "Mourning Person", "Gatekeeper", "Flower Seller", "Dead Person"],
+        "Concert": ["Dancer", "Singer", "Fan", "Guitarist", "Drummer", "Roadie", "Sound Technician"],
+        "Jazz Club": ["Bouncer", "Saxophonist", "Pianist", "Singer", "Barman", "VIP", "Waiter"],
+        "Wedding": ["Ring Bearer", "Groom", "Bride", "Officiant", "Photographer", "Father of the Bride", "Relative"],
+        "Gas Station": ["Service Attendant", "Shopkeeper", "Customer", "Car Washer", "Manager", "Cashier", "Climate Change Activist"],
+        "Harbor Docks": ["Loader", "Salty Old Pirate", "Captain", "Sailor", "Fisherman", "Exporter", "Smuggler"],
+        "Sightseeing Bus": ["Old Man", "Tourist", "Driver", "Annoying Child", "Tour Guide", "Photographer", "Tourist"]
       }
     }
   }

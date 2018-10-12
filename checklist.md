@@ -1,4 +1,4 @@
 - [x] Always display message box in game
 - [x] Check for roomcode errors
-- [ ] Location guessing mechanism
-- [ ] Timer mechanism
+- [x] Location guessing mechanism
+- [-] Timer mechanism

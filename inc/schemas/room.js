@@ -23,7 +23,7 @@ const RoomSchema = new mongoose.Schema({
   },
   deck: {
     type: String,
-    default: "default"
+    default: ""
   },
   rounds: {
     type: Number,
@@ -32,6 +32,10 @@ const RoomSchema = new mongoose.Schema({
   roundLength: {
     type: Number,
     default: 540,
+  },
+  timeoutLength: {
+    type: Number,
+    default: 30
   },
   currentRound: {
     spy: String,
@@ -64,12 +68,25 @@ const RoomSchema = new mongoose.Schema({
     },
     votingFor: String,
     votedBy: String,
+    victory: String,
     discussion: [{
       fromUsername: String,
       message: String
     }],
     timerStarted: {
       type: Date
+    },
+    timerDelta: {
+      type: Number,
+      default: 0,
+    },
+    timerPaused: {
+      type: Date,
+      default: null
+    },
+    timeoutStarted: {
+      type: Date,
+      default: null
     }
   }
 })
@@ -80,7 +97,7 @@ const Room = mongoose.model('Room', RoomSchema)
 
 global.fn.createRoom = function(master, callback, options) {
 
-  const def_options = ['rounds', 'chat', 'roundLength', 'deck']
+  const def_options = ['rounds', 'chat', 'roundLength', 'deck', 'timeoutLength']
 
   const code_callback = function(err, code) {
 
@@ -246,7 +263,7 @@ global.fn.startRound = function(roomcode, callback) {
 
     const playerUsernames = global.fn.mapKeys(room.players)
 
-    const deck = room.deck
+    const deck = room.deck ? room.deck : global.gamedata.default
 
     // Get random deck
     const pileindex = global.fn.getRandomPile(deck)
@@ -299,6 +316,11 @@ global.fn.startRound = function(roomcode, callback) {
     const current = room.currentRound
     current.dealer = current.number == 0 ? room.master : current.spy
 
+    current.victory = null
+
+    current.timerDelta = 0
+    current.timerPaused = null
+
     current.spy = spy
     current.location = pileindex
     current.number += 1
@@ -308,12 +330,93 @@ global.fn.startRound = function(roomcode, callback) {
     current.spyGuessed = false
     current.roles = roles
     current.messages = []
-    current.votes = {}
     current.votingFor = null
     current.discussion = []
-    current.timerStarted = Date.now()
+    current.timerStarted = new Date()
+    current.timeoutStarted = null
+
+    if (current.votes && current.votes.clear)
+      current.votes.clear()
+    else
+      current.votes = {}
 
     room.save(callback)
+  })
+}
+
+global.fn.startTimeout = function(roomcode, callback) {
+  Room.findById(roomcode, function(err, room) {
+    if (err)
+      return callback(err, null)
+
+    if (room.currentRound.timeoutStarted)
+      return callback(null, false)
+
+    const now = new Date()
+    room.currentRound.timeoutStarted = now
+    room.save(function(err) {
+      if (err)
+        return callback(err, null)
+      callback(null, now)
+    })
+
+  })
+}
+
+global.fn.stopTimeout = function(roomcode, callback) {
+  Room.findById(roomcode, function(err, room) {
+    if (err)
+      return callback(err, null)
+
+    if (!room.currentRound.timeoutStarted)
+      return callback(null, false)
+
+    room.currentRound.timeoutStarted = null
+    room.save(function(err) {
+      if (err)
+        return callback(err, null)
+      callback(null, true)
+    })
+
+  })
+}
+
+global.fn.pauseTimer = function(roomcode, callback) {
+  Room.findById(roomcode, function(err, room) {
+    if (err)
+      return callback(err, null)
+
+    if (room.currentRound.timerPaused)
+      return callback(null, false)
+
+    const now = new Date()
+    room.currentRound.timerPaused = now
+
+    room.save(function(err) {
+      if (err)
+        return callback(err, null)
+      callback(null, now)
+    })
+  })
+}
+
+global.fn.resumeTimer = function(roomcode, callback) {
+  Room.findById(roomcode, function(err, room) {
+    if (err)
+      return callback(err, null)
+
+    if (!room.currentRound.timerPaused)
+      return callback(null, false)
+
+    room.currentRound.timerPaused = null
+    const diff = new global.datediff(new Date(), room.currentRound.timerPaused)
+    room.currentRound.timerDelta += diff.seconds()
+
+    room.save(function(err) {
+      if (err)
+        return callback(err, null)
+      callback(null, true)
+    })
   })
 }
 
@@ -327,8 +430,8 @@ global.fn.checkEnded = function(roomcode, callback) {
     if (!room.currentRound.timerStarted)
       return callback(null, false, gameEnds, room)
 
-    const diff = new global.datediff(Date.now(), room.currentRound.timerStarted)
-    callback(null, diff.seconds() > room.roundLength, gameEnds, room)
+    const diff = new global.datediff(new Date(), room.currentRound.timerStarted)
+    callback(null, diff.seconds() - room.currentRound.timerDelta > room.roundLength, gameEnds, room)
   })
 }
 
@@ -376,6 +479,7 @@ global.fn.questionMessage = function(roomcode, from, to, message, callback) {
       toUsername: to
     }
 
+    room.currentRound.timeoutStarted = null
     room.currentRound.messages.push(msg_new)
 
     room.save(function(err, new_room) {
@@ -409,6 +513,7 @@ global.fn.answerMessage = function(roomcode, user, answer, callback) {
       return callback(auth_error, {}, room)
     }
 
+    room.currentRound.timeoutStarted = null
     msg_obj.answer = answer
 
     room.save(function(err, new_room) {
@@ -549,11 +654,12 @@ global.fn.insideRoom = function(roomcode, username, callback) {
   Room.findById(roomcode, function(err, room) {
     if (err)
       return callback(err, null)
-    if (!room) {
+    if (!room || !room.players) {
       const find_error = new Error('Room not found.')
       find_error.status = 404
       return callback(find_error, null)
     }
+
 
     const player = room.players.get(username)
 
@@ -606,8 +712,8 @@ global.fn.connectRoom = function(roomcode, username, callback) {
       initiated = willAccuse.indexOf(username) >= 0
     }
 
-    const piles = global.gamedata.decks[room.deck].piles
-
+    const deck = room.deck ? room.deck : global.gamedata.default
+    const piles = global.gamedata.decks[deck].piles
 
     const stateObject = {
       asked: !newQuestion,
@@ -627,18 +733,31 @@ global.fn.connectRoom = function(roomcode, username, callback) {
       number: room.currentRound.number,
       open: room.open,
       phase: room.currentRound.phase,
-      players: global.fn.mapToObject(room.players),
       roundLength: room.roundLength,
       rounds: room.rounds,
       spyGuessed: room.currentRound.spyGuessed,
+      timerDelta: room.currentRound.timerDelta,
       timerStarted: room.currentRound.timerStarted,
+      timeoutLength: room.timeoutLength,
+      timeoutStarted: room.currentRound.timerStarted,
       username: username,
+      victory: room.currentRound.victory,
       votedBy: room.currentRound.votedBy,
       votes: room.currentRound.votes ? global.fn.mapToObject(room.currentRound.votes) : {},
       votingFor: room.currentRound.votingFor
     }
 
-    callback(null, stateObject)
+    const players = global.fn.mapKeys(room.players)
+    global.fn.groupConnection(players, (states) => {
+      const playersObject = {}
+
+      for (const player of players)
+        playersObject[player] = Object.assign( { connected: states[player] }, room.players.get(player) )
+
+      stateObject.players = playersObject
+
+      callback(null, stateObject)
+    })
   })
 }
 
@@ -662,7 +781,7 @@ global.fn.voteRoom = function (roomcode, username, guess, callback) {
     }
 
     room.currentRound.votingFor = guess
-    room.votes = {}
+    room.currentRound.votes.clear()
     room.currentRound.votedBy = username
 
     room.save(callback)
@@ -674,7 +793,7 @@ global.fn.checkGuess = function(roomcode, username, guess, callback) {
     if (err)
       return callback(err, null)
 
-    if (room.open || phase != 2 || room.currentRound.spy != username) {
+    if (room.open || room.currentRound.phase != 2 || room.currentRound.spy != username) {
       const immutable_error = new Error('You can\'t do that action during this phase.')
       immutable_error.status = 403
       return callback(immutable_error, null)
@@ -715,7 +834,6 @@ global.fn.setCheckVote = function(roomcode, username, vote, callback) {
 
     room.currentRound.votes.set(username, vote)
 
-
     room.save(function(err, new_room) {
       if (err)
         return callback(err, null)
@@ -726,17 +844,14 @@ global.fn.setCheckVote = function(roomcode, username, vote, callback) {
 
       for ( const player of new_room.players.keys() ) {
         if ( player != new_room.currentRound.votedBy && player != new_room.currentRound.votingFor ) {
-          const vote = new_room.currentRound.votes.get(username)
-
-          if ( typeof vote != 'boolean' )
+          if ( new_room.currentRound.votes.has(player) ) {
+            if ( new_room.currentRound.votes.get(player) ) playersTrue++
+          } else
             allvoted = false
-          else if (vote == true)
-            playersTrue++
         }
       }
 
       const consensus = (playersTrue/playerSize) > global.config.consensus_percent
-      console.log(consensus+' '+(playersTrue/playerSize))
       callback(null, allvoted, consensus, new_room.currentRound.spy == new_room.currentRound.votingFor, new_room)
     })
   })
@@ -745,7 +860,6 @@ global.fn.setCheckVote = function(roomcode, username, vote, callback) {
 global.fn.roomScoring = function(roomcode, scoring, callback) {
   Room.findById(roomcode, function(err, room) {
     // Check scoring section
-    console.log('calc score')
     const spyUser = room.currentRound.spy
     if (scoring == 0 || scoring == 1 || scoring == 4 ) {
       // Spy win
@@ -774,7 +888,6 @@ global.fn.roomScoring = function(roomcode, scoring, callback) {
         }
       }
     }
-    console.log('sav score')
     room.save(callback)
   })
 }
@@ -785,6 +898,43 @@ global.fn.roomAccuse = function(roomcode, callback) {
     room.currentRound.willAccuse = global.fn.mapKeys(room.players)
 
     room.save(callback)
+  })
+}
+
+global.fn.announceDisconnect = function(user, callback) {
+  const prop = "players."+user
+  const query = {}
+  query[prop] = { "$exists": true }
+  Room.find(query, function(err, docs) {
+    if (err) {
+      console.log(err)
+      callback(false)
+    }
+
+    for (const room of docs)
+      global.sck.game.in(room._id).emit('user_disconnected game', user)
+
+    callback(true)
+  })
+}
+
+global.fn.announceConnect = function(user, callback) {
+  const prop = "players."+user
+  const query = {}
+  query[prop] = { "$exists": true }
+  Room.find(query, function(err, docs) {
+    if (err) {
+      console.log(err)
+      callback(false)
+    }
+
+
+
+    for (const room of docs) {
+      global.sck.game.in(room._id).emit('user_connected game', user)
+    }
+
+    callback(true)
   })
 }
 

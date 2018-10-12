@@ -41,6 +41,9 @@ $.fn.randomInt = (min, max) => {
 }
 
 $.fn.getRandomPile = (deck) => {
+  if (!deck)
+    deck = global.gamedata.default
+    
   const piles = global.gamedata.decks[deck].piles
 
   if (!piles)
@@ -49,8 +52,6 @@ $.fn.getRandomPile = (deck) => {
   const pilesKeys = Object.keys(piles)
   const pilesLength = pilesKeys.length
   const index = global.fn.randomInt(0, pilesLength-1)
-
-  // console.log('The index: '+(index+1)+' of '+decksLength)
 
   return pilesKeys[index]
 }

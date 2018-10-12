@@ -51,6 +51,14 @@ global.fn.createUser = function(username, password, callback) {
   })
 }
 
+global.fn.hasUser = function(username, callback) {
+  User.findById(username, function(err, user) {
+    if (err || !user)
+      return callback(false)
+    callback(true)
+  })
+}
+
 global.fn.verifyUser = function(username, password, callback) {
   // Check session
   User.findById(username, function(err, user) {

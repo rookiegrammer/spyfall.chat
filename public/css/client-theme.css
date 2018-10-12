@@ -4189,7 +4189,9 @@ img.emoji { height: 1em; width: 1em; margin: 0 .05em 0 .1em; vertical-align: -0.
 
 .player-avatar, .menu-button { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; width: 4em; height: 4em; border-radius: 2em; margin: 0.2em; }
 
-.player-avatar { background-color: #1e87f0; color: #fff; }
+.player-avatar { background-color: #222; color: #fff; }
+
+.player-avatar.connected, .player-avatar.player-user { background-color: #1e87f0; }
 
 .player-avatar.player-user { width: 3em; height: 3em; border: solid #333 0.5em; }
 
@@ -4219,15 +4221,29 @@ img.emoji { height: 1em; width: 1em; margin: 0 .05em 0 .1em; vertical-align: -0.
 
 html.in-game, html.in-game body { height: 100%; }
 
-html.in-game body { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
+html.in-game body { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; overflow: hidden; }
 
-html.in-game body > .uk-container { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; overflow: hidden; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; width: 100%; margin: 0; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-sizing: border-box; box-sizing: border-box; max-width: none; }
+html.in-game body > .uk-container { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; width: 100%; margin: 0; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-sizing: border-box; box-sizing: border-box; max-width: none; }
 
-html.in-game #game-container, html.in-game .game-flex-col { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; }
+html.in-game #game-container, html.in-game .game-stretch { width: 100%; height: 100%; }
 
-html.in-game .game-stretch { width: 100%; height: 100%; }
+html.in-game .game { height: 100%; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: stretch; -ms-flex-pack: stretch; justify-content: stretch; -webkit-box-align: stretch; -ms-flex-align: stretch; align-items: stretch; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
-html.in-game .game-flex-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; flex-direction: row; -webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; }
+html.in-game .game-box { -webkit-box-sizing: border-box; box-sizing: border-box; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: stretch; -ms-flex-align: stretch; align-items: stretch; -webkit-box-pack: stretch; -ms-flex-pack: stretch; justify-content: stretch; }
+
+html.in-game .dir-c { -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
+
+html.in-game .grow-h { height: 100%; }
+
+html.in-game .grow-w { width: 100%; }
+
+html.in-game .grow { -webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; -ms-flex-negative: 1; flex-shrink: 1; }
+
+html.in-game .scroll { overflow-y: scroll; }
+
+html.in-game .game-flex-col { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: stretch; -ms-flex-pack: stretch; justify-content: stretch; }
+
+html.in-game .game-flex-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; flex-direction: row; -webkit-box-pack: stretch; -ms-flex-pack: stretch; justify-content: stretch; -webkit-box-align: stretch; -ms-flex-align: stretch; align-items: stretch; }
 
 html.in-game .game-scr-col { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; overflow-y: auto; }
 
@@ -4241,6 +4257,8 @@ html.in-game .game-initiate:disabled, html.in-game .game-initiate:disabled:hover
 
 html.in-game .game-locations { max-width: 100%; }
 
+html.in-game .menu-icon > svg { max-width: 2em; }
+
 html.in-game .no-margin { margin: 0 !important; }
 
 @media (max-height: 640px) { html.in-game { font-size: 12px; } }
@@ -4250,6 +4268,46 @@ html.in-game .no-margin { margin: 0 !important; }
 @media (max-height: 480px) { html.in-game { font-size: 8px; } }
 
 @media (max-width: 640px) { html.in-game { font-size: 8px; } }
+
+.spyfall-timer-position-wrap { position: absolute; top: 1rem; right: 1rem; z-index: 1; }
+
+.spyfall-timer-wrap { position: relative; font-family: sans-serif; font-size: 1.8rem; font-weight: bold; color: #222; /**/ }
+
+.spyfall-timer-sector { fill: #fff; /**/ stroke: #1e87f0; /**/ stroke-width: 40; /**/ -webkit-transition: 0.5s ease-out; -o-transition: 0.5s ease-out; transition: 0.5s ease-out; }
+
+.spyfall-timer-text { text-align: center; position: absolute; -webkit-transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%); padding: 0.2em; background: #fff; /**/ border-radius: 1em; min-width: 1em; display: inline-block; }
+
+.spyfall-timer-circle { -webkit-transform: rotate(-90deg); -ms-transform: rotate(-90deg); transform: rotate(-90deg); background: #fff; /**/ border-radius: 50%; }
+
+a.uk-link-heading.uk-active:not(:hover) { color: #1e87f0; }
+
+@-webkit-keyframes hidecard { 0% { display: block;
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg); }
+  100% { opacity: 0;
+    display: none;
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); } }
+
+@keyframes hidecard { 0% { display: block;
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg); }
+  100% { opacity: 0;
+    display: none;
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); } }
+
+@-webkit-keyframes showcard { 0% { display: block; } }
+
+@keyframes showcard { 0% { display: block; } }
+
+.spyfall-role-box { position: absolute; top: 100%; left: 0; right: 0; z-index: 9999; opacity: 0; -webkit-transition: 0.5s; -o-transition: 0.5s; transition: 0.5s; -webkit-transform: rotate(30deg); -ms-transform: rotate(30deg); transform: rotate(30deg); }
+
+.spyfall-role-box .role-box-card { -webkit-box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.2); box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.2); border-radius: 1.5rem; }
+
+.spyfall-role-box.show { top: 0; opacity: 1; -webkit-animation-name: showcard; animation-name: showcard; -webkit-animation-duration: 500ms; animation-duration: 500ms; -webkit-transform: rotate(0deg); -ms-transform: rotate(0deg); transform: rotate(0deg); }
+
+.spyfall-role-box .role-box-toggle { font-size: 2rem; }
 
 @-webkit-keyframes showemoji { 0% { width: 0;
     height: 0;

@@ -20,3 +20,4 @@ global.mongoose = mongoose
 require('./schemas/user.js')
 require('./schemas/room.js')
 require('./schemas/message.js')
+require('./schemas/connections.js') 
