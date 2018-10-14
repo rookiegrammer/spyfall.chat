@@ -4301,14 +4301,6 @@ a.uk-link-heading.uk-active:not(:hover) { color: #1e87f0; }
 
 @keyframes showcard { 0% { display: block; } }
 
-.spyfall-role-box { position: absolute; top: 100%; left: 0; right: 0; z-index: 9999; opacity: 0; -webkit-transition: 0.5s; -o-transition: 0.5s; transition: 0.5s; -webkit-transform: rotate(30deg); -ms-transform: rotate(30deg); transform: rotate(30deg); }
-
-.spyfall-role-box .role-box-card { -webkit-box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.2); box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.2); border-radius: 1.5rem; }
-
-.spyfall-role-box.show { top: 0; opacity: 1; -webkit-animation-name: showcard; animation-name: showcard; -webkit-animation-duration: 500ms; animation-duration: 500ms; -webkit-transform: rotate(0deg); -ms-transform: rotate(0deg); transform: rotate(0deg); }
-
-.spyfall-role-box .role-box-toggle { font-size: 2rem; }
-
 @-webkit-keyframes showemoji { 0% { width: 0;
     height: 0;
     opacity: 1; }

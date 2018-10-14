@@ -296,35 +296,6 @@ a.uk-link-heading.uk-active:not(:hover) {
   }
 }
 
-.spyfall-role-box {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 9999;
-  opacity: 0;
-  transition: 0.5s;
-  transform: rotate(30deg);
-
-  .role-box-card {
-    box-shadow: 0 0 10px 5px rgba(0,0,0,0.2);
-    border-radius: 1.5rem;
-  }
-
-  &.show {
-    top: 0;
-    opacity: 1;
-
-    animation-name: showcard;
-    animation-duration: 500ms;
-    transform: rotate(0deg);
-  }
-
-  .role-box-toggle {
-    font-size: 2rem;
-  }
-
-}
 
 @keyframes showemoji {
     0%   {
