@@ -884,7 +884,6 @@ class SpyfallGameBox extends React.Component {
   roleBox = () => {
     var heading = [];
     var subtext = [];
-    var alignrt = '';
     var elkey = 0;
     const alt = this.state.phase == 1
     const user = this.state.username
@@ -929,22 +928,14 @@ class SpyfallGameBox extends React.Component {
 
     } else {
       const spy = this.state.game.role == 'spy'
-      const alreadyAccused = !spy && this.state.hasAccused.indexOf(this.state.username) >= 0;
       heading = ['You are the '+ (spy ? 'Spy' : this.state.game.role) +'!']
       subtext = [(spy ? '' : <div key={'role-'+(elkey++)}>The location is the {this.state.game.location}.</div>)]
-      alignrt = (alreadyAccused || this.state.phase != 0) ? '' : <button className="uk-button uk-button-primary game-initiate" disabled={this.state.initiated} onClick={this.initiateGame}>Initiate {spy?'Guess':'Suspicion'}</button>
     }
 
     return (
-      <div id={"spyfall-role-box-"+this.props.key} className="spyfall-role-box uk-padding-small" style={{display: 'none'}}>
-        <div className={"role-box-card uk-text-left uk-card uk-card-default uk-padding uk-card-body"+(alt?' alter':'')}>
-          <div className="uk-padding-small uk-background-primary uk-light uk-text-center">
-            <h2 className="uk-text-bold no-margin">{heading}</h2>
-            { subtext }
-            <br />
-            <div className="no-margin">{alignrt}</div>
-          </div>
-        </div>
+      <div id={"spyfall-role-box-"+this.props.key} className="spyfall-role-box uk-padding-small">
+        <h2 className="uk-text-bold no-margin">{heading}</h2>
+        { subtext }
       </div>
     )
 
@@ -989,7 +980,7 @@ class SpyfallGameBox extends React.Component {
         list.push(' ')
       }
       messages =
-      <div className="grow-h uk-text-center uk-text-break game-locations uk-padding">
+      <div className="game-messages grow-h uk-text-center uk-text-break game-locations uk-padding uk-card uk-card-body">
         <h2>Locations</h2>
         {list}
       </div>
@@ -1020,69 +1011,59 @@ class SpyfallGameBox extends React.Component {
   render() {
     return (
       <div className="game-box grow-h uk-padding uk-padding-remove-horizontal">
-        {this.state.connected ?
-          <div className="game-box grow">
-            <div className="player-box">
+      {this.state.connected ?
+        <div className="game-box dir-c grow">
+          <div className="game-box">
+            <div className="game-box grow">
+              { this.roleBox() }
+            </div>
+            <div className="game-box">
+              <div>
+                <button className="uk-button uk-button-primary game-initiate" disabled={this.state.initiated || this.state.hasAccused.indexOf(this.state.username) >= 0} onClick={this.initiateGame}>Initiate { this.state.game.role == 'spy' ?'Guess':'Suspicion'}</button>
+              </div>
+              <div>
+                <button className="uk-button uk-button-secondary" onClick={this.toggleMessageBox}>
+                  Toggle View
+                </button>
+              </div>
               <div className="" key={'menu'}>
                 <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
-              </div>
-              {this.playersBox()}
-            </div>
-            <div className="game-box grow dir-c uk-margin-left">
-              {
-                !this.state.open
-                &&
-                <div className="uk-margin-small-bottom">
-                  <b>SPYFALL.CHAT</b>
-                  <div className="uk-align-right no-margin">
-                    <a id={"spyfall-role-toggle-"+this.props.key} className="uk-link-heading" onClick={this.toggleRoleBox}>
-                      <span className="menu-icon" uk-icon="icon: location; ratio: 1.5"></span>
-                    </a>
-                    &nbsp; | &nbsp;
-                    <a className="uk-link-heading" onClick={toggleFullscreen}>
-                      <span className="menu-icon" uk-icon="icon: tv; ratio: 1.5"></span>
-                    </a>
-                    &nbsp; | &nbsp;
-                    <a className="uk-link-heading" onClick={this.toggleMessageBox}>
-                      <span className="menu-icon" uk-icon="icon: copy; ratio: 1.5"></span>
-                    </a>
-                  </div>
-                </div>
-              }
-              <div className="game-box dir-c uk-position-relative">
-                {
-                  !this.state.open
-                  &&
-                  this.roleBox()
-                }
-                {
-                  !this.state.open
-                  &&
-                  <div className="game-box grow dir-c uk-position-relative">
-                    <div className="spyfall-timer-position-wrap">
-                      <SpyfallTimer radius={25} interval={1000} length={this.state.timeoutLength} started={this.state.timeoutStarted} />
-                    </div>
-                    <div id={"spyfall-message-"+this.props.key} className="game-box dir-c grow scroll">
-                      { this.messageBox()}
-                    </div>
-                    { this.inputBox() }
-                  </div>
-                }
-                { this.state.master && (this.state.open || this.state.phase == 1) &&
-                  <button onClick={this.state.number < this.state.rounds ? (this.state.number == 0 ? this.startGame : this.newGame) : this.closeGame } className={"uk-button "+(this.state.number < this.state.rounds ? "uk-button-primary":"uk-button-danger")}>{this.state.number < this.state.rounds ? (this.state.number == 0 ? 'Start' : 'Proceed') : 'Close'}</button>
-                }
-                <div className="uk-text-right uk-text-meta uk-margin-small">User: <code>{this.state.username}</code> | Room: <code>{this.state.roomcode}</code></div>
               </div>
             </div>
           </div>
-          : <div className="game-box dir-c grow-w">
-              <div className="" key={'menu'}>
-                <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
-              </div>
-              <input className="uk-input uk-margin" type="text" onChange={this.handleInputChange} placeholder="Room Code" name="roomcode" value={this.state.roomcode} />
-              <button onClick={this.connectGame} className="uk-button uk-button-primary">Connect</button>
+          <div className="game-box grow uk-margin-left">
+            <div className="player-box">
+              {this.playersBox()}
             </div>
-        }
+            <div className="game-box dir-c grow uk-position-relative">
+              {
+                !this.state.open
+                &&
+                <div className="game-box grow dir-c uk-position-relative">
+                  <div className="spyfall-timer-position-wrap">
+                    <SpyfallTimer radius={25} interval={1000} length={this.state.timeoutLength} started={this.state.timeoutStarted} />
+                  </div>
+                  <div id={"spyfall-message-"+this.props.key} className="game-box dir-c grow scroll">
+                    { this.messageBox()}
+                  </div>
+                  { this.inputBox() }
+                </div>
+              }
+              { this.state.master && (this.state.open || this.state.phase == 1) &&
+                <button onClick={this.state.number < this.state.rounds ? (this.state.number == 0 ? this.startGame : this.newGame) : this.closeGame } className={"uk-button "+(this.state.number < this.state.rounds ? "uk-button-primary":"uk-button-danger")}>{this.state.number < this.state.rounds ? (this.state.number == 0 ? 'Start' : 'Proceed') : 'Close'}</button>
+              }
+              <div className="uk-text-right uk-text-meta uk-margin-small"><a className="" onClick={toggleFullscreen}>Toggle Fullscrren</a> | User: <code>{this.state.username}</code> | Room: <code>{this.state.roomcode}</code></div>
+            </div>
+          </div>
+        </div>
+        : <div className="game-box dir-c grow-w">
+            <div className="" key={'menu'}>
+              <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
+            </div>
+            <input className="uk-input uk-margin" type="text" onChange={this.handleInputChange} placeholder="Room Code" name="roomcode" value={this.state.roomcode} />
+            <button onClick={this.connectGame} className="uk-button uk-button-primary">Connect</button>
+          </div>
+      }
       </div>
     )
   }
