@@ -1,6 +1,8 @@
 
 .DS_Store
 
+.bin/
+
 # Logs
 logs
 *.log
