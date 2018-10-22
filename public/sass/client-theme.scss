@@ -199,12 +199,32 @@ html.in-game {
     flex-shrink: 0;
   }
 
-  .game-initiate:disabled {
-    &, &:hover, &:active {
-      background-color: $global-secondary-background;
-      color: $global-inverse-color;
-      cursor: not-allowed;
+  .game-actions-wrap {
+    height: 100%;
+    padding: 2% 0;
+    box-sizing: border-box;
+  }
+
+  .game-initiate, .game-toggler {
+    height: 100%;
+    margin: 0 0.2em;
+  }
+
+  .game-initiate {
+    border-radius: 2em 2em 2em 0;
+    background-color: $global-primary-background;
+
+    &:disabled {
+      &, &:hover, &:active {
+        background-color: $global-secondary-background;
+        color: $global-inverse-color;
+        cursor: not-allowed;
+      }
     }
+  }
+
+  .game-toggler {
+    border-radius: 2em;
   }
 
   .game-locations {

@@ -4253,7 +4253,15 @@ html.in-game .game-var-row { -webkit-box-flex: 1; -ms-flex: 1 0 0px; flex: 1 0 0
 
 html.in-game .player-box { overflow-y: auto; -ms-flex-negative: 0; flex-shrink: 0; }
 
+html.in-game .game-actions-wrap { height: 100%; padding: 2% 0; -webkit-box-sizing: border-box; box-sizing: border-box; }
+
+html.in-game .game-initiate, html.in-game .game-toggler { height: 100%; margin: 0 0.2em; }
+
+html.in-game .game-initiate { border-radius: 2em 2em 2em 0; background-color: #1e87f0; }
+
 html.in-game .game-initiate:disabled, html.in-game .game-initiate:disabled:hover, html.in-game .game-initiate:disabled:active { background-color: #222; color: #fff; cursor: not-allowed; }
+
+html.in-game .game-toggler { border-radius: 2em; }
 
 html.in-game .game-locations { max-width: 100%; }
 

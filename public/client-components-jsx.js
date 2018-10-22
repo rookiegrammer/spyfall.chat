@@ -1019,12 +1019,12 @@ class SpyfallGameBox extends React.Component {
             </div>
             <div className="game-box">
               <div>
-                <button className="uk-button uk-button-primary game-initiate" disabled={this.state.initiated || this.state.hasAccused.indexOf(this.state.username) >= 0} onClick={this.initiateGame}>Initiate { this.state.game.role == 'spy' ?'Guess':'Suspicion'}</button>
-              </div>
-              <div>
-                <button className="uk-button uk-button-secondary" onClick={this.toggleMessageBox}>
-                  Toggle View
-                </button>
+                <div className="uk-position-relative game-actions-wrap">
+                  <button className="uk-button uk-button-primary game-initiate" disabled={this.state.initiated || this.state.hasAccused.indexOf(this.state.username) >= 0} onClick={this.initiateGame}>Initiate { this.state.game.role == 'spy' ?'Guess':'Suspicion'}</button>
+                  <button className="uk-button uk-button-secondary game-toggler" onClick={this.toggleMessageBox}>
+                    Toggle View
+                  </button>
+                </div>
               </div>
               <div className="" key={'menu'}>
                 <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
