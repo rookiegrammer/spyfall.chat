@@ -4185,6 +4185,49 @@ iframe.uk-cover { pointer-events: none; }
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; } }
 
+.menu { position: relative; z-index: 10; }
+
+.menu__item { line-height: 1; position: relative; display: block; margin: 1em 0; outline: none; text-decoration: none; }
+
+.menu__item:hover, .menu__item:active { text-decoration: none; }
+
+.menu__item-name, .menu__item-label { position: relative; display: inline-block; }
+
+.menu__item-name { font-size: 1.25em; }
+
+.menu__item-label { margin: 0 0 0 0.5em; }
+
+@media screen and (min-width: 50em) { .icon--keyboard { position: absolute; right: 0.55em; bottom: -30%; display: block; width: 54px; height: 46px; fill: var(--color-link); }
+  .demos { display: -webkit-box; display: -ms-flexbox; display: flex; padding-right: 80px; justify-self: end; }
+  .demo { display: block; width: 17px; height: 17px; margin: 0 5px 0 0; border: 2px solid; border-radius: 2px; }
+  a.demo--current { background: currentColor; }
+  .demo span { position: absolute; top: -0.2em; right: 100%; display: none; margin: 0 1em 0 0; }
+  .demo--current span { display: block; } }
+
+@media screen and (max-width: 50em) { html, body { overflow-x: hidden; width: 100vw; height: 100%; }
+  .content { height: auto; min-height: 0; padding-bottom: 10em; }
+  .content--fixed { position: relative; z-index: 1000; display: block; padding: 0.85em; }
+  .codrops-header { -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-align: center; -ms-flex-align: center; align-items: center; }
+  .codrops-header__title { font-weight: bold; padding-bottom: 0.25em; text-align: center; }
+  .github { display: block; margin: 1em auto; }
+  .codrops-links { margin: 0; } }
+
+.menu--dustu .menu__item { font-family: 'Work Sans', serif; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; margin: 2em 0; }
+
+.menu--dustu .menu__item-name { font-size: 1.75em; font-weight: bold; overflow: hidden; padding: 0 0.25em; text-transform: uppercase; color: #000; }
+
+.menu--dustu .menu__item-name::before, .menu--dustu .menu__item-name::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #eb2141; -webkit-transform: translate3d(-100%, 0, 0) translate3d(-1px, 0, 0); transform: translate3d(-100%, 0, 0) translate3d(-1px, 0, 0); -webkit-transition: -webkit-transform 0.7s; transition: -webkit-transform 0.7s; -o-transition: transform 0.7s; transition: transform 0.7s; transition: transform 0.7s, -webkit-transform 0.7s; -webkit-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); -o-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
+
+.menu--dustu .menu__item:hover .menu__item-name::before { -webkit-transform: translate3d(100%, 0, 0) translate3d(1px, 0, 0); transform: translate3d(100%, 0, 0) translate3d(1px, 0, 0); }
+
+.menu--dustu .menu__item:hover .menu__item-name::after { -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
+
+.menu--dustu .menu__item-name::after { top: calc(50% - 2px); height: 4px; }
+
+.menu--dustu .menu__item-label { font-size: 1em; margin: 0.5em 0 0 0; margin-top: 0.25em; padding: 0.5em; color: #ccc; -webkit-transition: color 0.7s; -o-transition: color 0.7s; transition: color 0.7s; -webkit-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); -o-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
+
+.menu--dustu .menu__item:hover .menu__item-label { color: #000; }
+
 img.emoji { height: 1em; width: 1em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; }
 
 .player-avatar, .menu-button { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; width: 4em; height: 4em; border-radius: 2em; margin: 0.2em; }
@@ -4209,19 +4252,27 @@ img.emoji { height: 1em; width: 1em; margin: 0 .05em 0 .1em; vertical-align: -0.
 
 .msg-inbound .msg-wrapper, .msg-outbound .msg-wrapper { padding: 0.5rem 1rem; border-radius: 0.5rem; display: inline-block; text-align: left; white-space: pre; }
 
-.game-talk { padding: 0.5rem 1rem; border-radius: 0.5rem; display: inline-block; text-align: left; white-space: pre; }
-
 .msg-inbound { text-align: left; }
 
 .msg-outbound { text-align: right; }
 
-.msg-inbound .msg-wrapper, .game-talk-a { background-color: #fff; color: #333; }
+.msg-inbound .msg-wrapper { background-color: #fff; color: #333; }
 
-.msg-outbound .msg-wrapper, .game-talk-q { background-color: #1e87f0; color: #fff; }
+.msg-outbound .msg-wrapper { background-color: #1e87f0; color: #fff; }
+
+.game-qa-talk { display: -webkit-inline-box; display: -ms-inline-flexbox; display: inline-flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-align: stretch; -ms-flex-align: stretch; align-items: stretch; }
+
+.game-qa-talk-q, .game-qa-talk-a { padding: .5rem 2rem; }
+
+.game-qa-talk-q { position: relative; background-color: #1e87f0; color: #fff; border-top-right-radius: 1rem; border-top-left-radius: 1rem; font-weight: bold; }
+
+.game-qa-talk-a { position: relative; background-color: #fff; color: #222; border-bottom-right-radius: 1rem; border-bottom-left-radius: 1rem; }
+
+.game-talk-person { margin-top: .2em; color: #222; font-size: .7em; font-weight: 900; text-transform: uppercase; display: block; }
 
 html.in-game, html.in-game body { height: 100%; }
 
-html.in-game body { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; overflow: hidden; }
+html.in-game body { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
 
 html.in-game body > .uk-container { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; width: 100%; margin: 0; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-sizing: border-box; box-sizing: border-box; max-width: none; }
 
@@ -4239,7 +4290,11 @@ html.in-game .grow-w { width: 100%; }
 
 html.in-game .grow { -webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; -ms-flex-negative: 1; flex-shrink: 1; }
 
-html.in-game .scroll { overflow-y: scroll; }
+html.in-game .no-shrink { -ms-flex-negative: 0; flex-shrink: 0; }
+
+html.in-game .scroll { overflow-y: scroll; height: 0; }
+
+html.in-game .game-flex-center { -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; }
 
 html.in-game .game-flex-col { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: stretch; -ms-flex-pack: stretch; justify-content: stretch; }
 
@@ -4253,7 +4308,7 @@ html.in-game .game-var-row { -webkit-box-flex: 1; -ms-flex: 1 0 0px; flex: 1 0 0
 
 html.in-game .player-box { overflow-y: auto; -ms-flex-negative: 0; flex-shrink: 0; }
 
-html.in-game .game-actions-wrap { height: 100%; padding: 2% 0; -webkit-box-sizing: border-box; box-sizing: border-box; }
+html.in-game .game-actions-wrap { height: 100%; padding: 1rem 0; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
 html.in-game .game-initiate, html.in-game .game-toggler { height: 100%; margin: 0 0.2em; }
 
@@ -4264,6 +4319,8 @@ html.in-game .game-initiate:disabled, html.in-game .game-initiate:disabled:hover
 html.in-game .game-toggler { border-radius: 2em; }
 
 html.in-game .game-locations { max-width: 100%; }
+
+html.in-game .game-role-box { background-color: #F6F6F6; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
 html.in-game .menu-icon > svg { max-width: 2em; }
 
@@ -4277,15 +4334,19 @@ html.in-game .no-margin { margin: 0 !important; }
 
 @media (max-width: 640px) { html.in-game { font-size: 8px; } }
 
-.spyfall-timer-position-wrap { position: absolute; top: 1rem; right: 1rem; z-index: 1; }
+.spyfall-timer-position-wrap { position: absolute; top: 1rem; right: 1rem; z-index: 1; -webkit-transition: 0.5s; -o-transition: 0.5s; transition: 0.5s; }
 
-.spyfall-timer-wrap { position: relative; font-family: sans-serif; font-size: 1.8rem; font-weight: bold; color: #222; /**/ }
+.spyfall-timer-position-wrap:hover, .spyfall-timer-position-wrap:active { opacity: 0.3; }
 
-.spyfall-timer-sector { fill: #fff; /**/ stroke: #1e87f0; /**/ stroke-width: 40; /**/ -webkit-transition: 0.5s ease-out; -o-transition: 0.5s ease-out; transition: 0.5s ease-out; }
+.spyfall-timer-wrap { position: relative; font-family: sans-serif; font-size: 2rem; font-weight: bold; color: #1e87f0; /**/ }
 
-.spyfall-timer-text { text-align: center; position: absolute; -webkit-transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%); padding: 0.2em; background: #fff; /**/ border-radius: 1em; min-width: 1em; display: inline-block; }
+.spyfall-timer-sector { fill: #1e87f0; /**/ stroke: #F6F6F6; /**/ stroke-width: 50; /**/ -webkit-transition: 0.5s ease-out; -o-transition: 0.5s ease-out; transition: 0.5s ease-out; }
 
-.spyfall-timer-circle { -webkit-transform: rotate(-90deg); -ms-transform: rotate(-90deg); transform: rotate(-90deg); background: #fff; /**/ border-radius: 50%; }
+.spyfall-timer-bg { fill: #fff; }
+
+.spyfall-timer-text { text-align: center; position: absolute; -webkit-transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%); transform: translate(-50%, -50%); padding: 0.2em; min-width: 1em; display: inline-block; }
+
+.spyfall-timer-circle { -webkit-transform: rotate(-90deg); -ms-transform: rotate(-90deg); transform: rotate(-90deg); border-radius: 50%; }
 
 a.uk-link-heading.uk-active:not(:hover) { color: #1e87f0; }
 

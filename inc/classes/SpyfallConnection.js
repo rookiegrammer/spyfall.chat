@@ -159,11 +159,7 @@ SpyfallConnection.prototype.eventLoadGame = function(roomcode, ack) {
     if (err) return ack(false)
 
     global.fn.registerConnection(socketId, username, function(registered) {
-      if (registered) {
-        console.log(username+'@'+socketId+' has connected, '+registered)
-        return ack(stateobj)
-      }
-      ack(false)
+      return ack(stateobj)
     })
   })
 }

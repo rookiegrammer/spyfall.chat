@@ -8,6 +8,10 @@
 
 @import "uikit/uikit-theme.scss";
 
+$tertiary-color: #F6F6F6;
+
+@import "plugin-dutsu";
+
 @mixin msgbubble() {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
@@ -81,10 +85,6 @@ img.emoji {
   }
 }
 
-.game-talk {
-  @include msgbubble()
-}
-
 .msg-inbound {
   text-align: left;
 }
@@ -93,14 +93,46 @@ img.emoji {
   text-align: right;
 }
 
-.msg-inbound .msg-wrapper, .game-talk-a {
+.msg-inbound .msg-wrapper {
   background-color: $global-background;
   color: $global-emphasis-color;
 }
 
-.msg-outbound .msg-wrapper, .game-talk-q {
+.msg-outbound .msg-wrapper {
   background-color: $global-primary-background;
   color: $global-inverse-color;
+}
+
+.game-qa-talk {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: stretch;
+}
+.game-qa-talk-q, .game-qa-talk-a {
+	padding: .5rem 2rem;
+}
+.game-qa-talk-q {
+	position: relative;
+	background-color: $global-primary-background;
+	color: $global-background;
+	border-top-right-radius: 1rem;
+	border-top-left-radius: 1rem;
+  font-weight: bold;
+}
+.game-qa-talk-a {
+	position: relative;
+	background-color: $global-background;
+	color: $global-secondary-background;
+	border-bottom-right-radius: 1rem;
+	border-bottom-left-radius: 1rem;
+}
+.game-talk-person {
+  margin-top: .2em;
+	color: $global-secondary-background;
+  font-size: .7em;
+  font-weight: 900;
+  text-transform: uppercase;
+	display: block;
 }
 
 html.in-game {
@@ -110,7 +142,6 @@ html.in-game {
   body {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
   }
   body > .uk-container {
     flex: 1 1 auto;
@@ -140,12 +171,14 @@ html.in-game {
     box-sizing: border-box;
     display: flex;
     align-items: stretch;
-    justify-content: stretch
+    justify-content: stretch;
   }
 
   .dir-c {
     flex-direction: column;
   }
+
+
 
   .grow-h {
     height: 100%;
@@ -160,8 +193,18 @@ html.in-game {
     flex-shrink: 1;
   }
 
+  .no-shrink {
+    flex-shrink: 0;
+  }
+
   .scroll {
     overflow-y: scroll;
+    height: 0;
+  }
+
+  .game-flex-center {
+    align-items: center;
+    justify-content: center;
   }
 
   .game-flex-col {
@@ -201,7 +244,7 @@ html.in-game {
 
   .game-actions-wrap {
     height: 100%;
-    padding: 2% 0;
+    padding: 1rem 0;
     box-sizing: border-box;
   }
 
@@ -229,6 +272,11 @@ html.in-game {
 
   .game-locations {
     max-width: 100%;
+  }
+
+  .game-role-box {
+    background-color: $tertiary-color;
+    box-sizing: border-box;
   }
 
   .menu-icon > svg {
@@ -261,20 +309,29 @@ html.in-game {
   top: 1rem;
   right: 1rem;
   z-index: 1;
+  transition: 0.5s;
+
+  &:hover, &:active {
+    opacity: 0.3
+  }
 }
 
 .spyfall-timer-wrap {
   position: relative;
   font-family: sans-serif;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
-  color: $global-secondary-background; /**/
+  color: $global-primary-background; /**/
 }
 .spyfall-timer-sector {
-  fill: $global-background; /**/
-  stroke: $global-primary-background; /**/
-  stroke-width: 40; /**/
+  fill: $global-primary-background; /**/
+  stroke: $tertiary-color; /**/
+  stroke-width: 50; /**/
   transition: 0.5s ease-out;
+}
+
+.spyfall-timer-bg {
+  fill: $global-background;
 }
 
 .spyfall-timer-text {
@@ -282,14 +339,11 @@ html.in-game {
   position: absolute;
   transform: translate(-50%, -50%);
   padding: 0.2em;
-  background: $global-background; /**/
-  border-radius: 1em;
   min-width: 1em;
   display: inline-block;
 }
 .spyfall-timer-circle {
   transform: rotate(-90deg);
-  background: $global-background; /**/
   border-radius: 50%;
 }
 

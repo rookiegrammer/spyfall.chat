@@ -175,26 +175,67 @@ class SpyfallTimer extends React.Component {
 
   update = () => {
     const elapsed = this.props.length - this.count
-    $('#spyfall-timer-sector-'+this.props.key).css('stroke-dasharray', (elapsed*this.circumference/this.props.length)+' '+this.circumference );
-    $('#spyfall-timer-text-'+this.props.key).html(this.count > 0 ? this.count : 0)
+    $('#spyfall-timer-sector-'+this.props.identifier).css('stroke-dasharray', (elapsed*this.circumference/this.props.length)+' '+this.circumference );
+    $('#spyfall-timer-text-'+this.props.identifier).html(this.count > 0 ? this.count : 0)
   }
 
   render() {
-    const x1 = window.innerWidth > 640 ? this.props.radius : this.props.radius * 0.5
+    const x1 = window.innerWidth > 640 ? this.props.radius : this.props.radius * 0.7
     const x2 = x1 + x1
-    const x4 = x2 + x2
     return (
-      <div className="spyfall-timer-wrap">
-        <svg className="spyfall-timer-circle" width={x4} height={x4}>
-          <circle className="spyfall-timer-sector" id={"spyfall-timer-sector-"+this.props.key} style={{'strokeWidth': x2*.8}} r={x1} cx={x2} cy={x2} />
+      <div hidden={this.props.hidden} className="spyfall-timer-wrap">
+        <svg className="spyfall-timer-circle" width={x2} height={x2}>
+          <circle className="spyfall-timer-sector" id={"spyfall-timer-sector-"+this.props.identifier} style={{'strokeWidth': x2}} r={x1} cx={x1} cy={x1} />
+          <circle className="spyfall-timer-bg" r={x1*0.65} cx={x1} cy={x1} />
         </svg>
-        <span className="spyfall-timer-text" id={"spyfall-timer-text-"+this.props.key} style={{top: (x2+'px'), left: (x2+'px')}} >
+        <span className="spyfall-timer-text" id={"spyfall-timer-text-"+this.props.identifier} style={{top: (x1+'px'), left: (x1+'px')}} >
         </span>
       </div>
     )
   }
 
 
+}
+
+class SpyfallProgressTimer extends React.Component {
+  constructor(props) {
+    super(props)
+    this.props = props
+    this.count = 0
+  }
+
+  componentDidMount = () => {
+    this.radius = this.props.radius
+    this.setupTick()
+  }
+
+  componentDidUpdate = () => {
+    if (this.lastStarted != this.props.started || this.lastLength != this.props.length)
+      this.setupTick()
+  }
+
+  setupTick = () => {
+    this.lastStarted = this.props.started
+    this.lastLength = this.props.length
+
+    this.circumference = 2 * Math.PI * this.props.radius
+
+    this.tick()
+  }
+
+  tick = () => {
+    this.count = Math.floor( ( Date.parse(this.props.started) - Date.now() )  / this.props.interval ) + this.props.length
+
+    if (this.count > 0)
+      setTimeout(this.tick, this.props.interval)
+
+    this.update()
+  }
+
+  update = () => {
+    const elapsed = this.props.length - this.count
+
+  }
 }
 
 class SpyfallMessageBox extends React.Component {
@@ -207,8 +248,8 @@ class SpyfallMessageBox extends React.Component {
   lastType = ''
 
   componentDidMount = () => {
-    var parent = $('#spyfall-message-'+this.props.key);
-    var child = $('#spyfall-message-box-'+this.props.key);
+    var parent = $('#spyfall-message-'+this.props.identifier);
+    var child = $('#spyfall-message-box-'+this.props.identifier);
     parent.scrollTop( child.outerHeight()-parent.height() );
 
     this.lastMessagesLength = this.props.messages.length;
@@ -220,8 +261,8 @@ class SpyfallMessageBox extends React.Component {
       && this.lastType == this.props.type )
       return
 
-    var parent = $('#spyfall-message-'+this.props.key);
-    var child = $('#spyfall-message-box-'+this.props.key);
+    var parent = $('#spyfall-message-'+this.props.identifier);
+    var child = $('#spyfall-message-box-'+this.props.identifier);
     parent.animate({ scrollTop: child.outerHeight()-parent.height() }, 1000 );
   }
 
@@ -235,11 +276,19 @@ class SpyfallMessageBox extends React.Component {
       const interviewee = (obj.toUsername == this.props.username) ? 'You' : obj.toUsername
 
       messages.push(
-        <div className="game-qa-talk uk-margin-medium-bottom" key={'qa-'+i}>
-          <div className="uk-margin-small-bottom uk-label">{interviewer} asked {interviewee}</div>
-          <div><div className="game-talk game-talk-q uk-margin-small-bottom">{obj.question}</div></div>
-          <div><div className="game-talk game-talk-a">{obj.answer ? obj.answer : '...'}</div></div>
-        </div>)
+        <div className="uk-margin-medium-bottom" key={'qa-'+i}>
+          <span className="game-qa-talk">
+            <div className="game-qa-talk-q">
+              <span className="game-talk-person">{interviewer}</span>
+              {obj.question}
+            </div>
+            <div className="game-qa-talk-a">
+              <span className="game-talk-person">{interviewee}</span>
+              {obj.answer}
+            </div>
+          </span>
+        </div>
+      )
     }
 
     if (messages.length == 0) {
@@ -283,7 +332,7 @@ class SpyfallMessageBox extends React.Component {
   render() {
     const title = this.props.title ? this.props.title : 'Q & A'
     return (
-      <div id={"spyfall-message-box-"+this.props.key} className={"game-messages uk-card uk-card-body uk-card-secondary uk-card-hover uk-text-center type-"+this.props.type}>
+      <div id={"spyfall-message-box-"+this.props.identifier} className={"game-messages uk-card uk-card-body uk-card-secondary uk-card-hover uk-text-center scroll grow type-"+this.props.type}>
         <div className="uk-margin-bottom uk-text-bold">{title}</div>
         {
           this.props.type == 'qa' ? this.qaBox() : this.discussBox()
@@ -293,77 +342,72 @@ class SpyfallMessageBox extends React.Component {
   }
 }
 
-class SpyfallProfilesBox extends React.Component {
+class SpyfallProfileIcon extends React.Component {
   constructor(props) {
     super(props);
-    // players, username
+    // data, username, key, isPlayer
+    // open, reactButtons
   }
-
   componentDidUpdate = (prevProps, prevState) => {
-
-    const el = $('#spyfall-user-'+this.props.update)
-    if (el.hasClass('show'))
-      el.removeClass('show')
-    el.toggleClass('show', 200, "easeOutSine")
-  }
-
-  createBox = () => {
-    const box = []
-    const players = this.props.players
-    const playerKeys = Object.keys(players)
-
-    for (var i = 0; i < playerKeys.length; i++) {
-      const player = playerKeys[i]
-      const obj = players[player]
-      const label = player ? (player.charAt(0)+'').toUpperCase() : '_'
-      const moji = memoji[obj.reaction]
-      const expression = twemoji.parse(moji ? moji : memoji[0],{
-        size: 72
-      })
-
-      const isUser = player == this.props.username
-      const isConnected = obj.connected
-
-      box.push(
-        <div className="player-profile uk-text-center" key={player} data-username={player}>
-          <div className={'player-avatar'+(isUser?' player-user':'')+(isConnected?' connected':'')}><div className="player-label">{label}</div></div>
-          <div uk-drop="pos: right-center">
-            <div className="uk-card uk-card-body uk-card-default">
-              {
-                !isUser &&
-                <div className="player-meta uk-margin-small-bottom">
-                  <div className="uk-text-meta">Player Username</div>
-                  <div className="uk-text-lead uk-text-bold">{player}</div>
-                </div>
-              }
-              {
-                !this.props.open &&
-                <div>
-                  <div className="uk-text-meta">{isUser?'Your':'Player'} Score</div>
-                  <div className="uk-text-lead uk-text-bold">{obj.score}</div>
-                </div>
-              }
-              {
-                isUser &&
-                <div className="uk-flex uk-flex-center uk-flex-wrap">
-                  {this.props.reactButtons}
-                </div>
-              }
-            </div>
-          </div>
-          <div id={"spyfall-user-"+player} className="player-reaction" dangerouslySetInnerHTML={{__html: expression}} />
-        </div>
-      )
+    if (prevProps.data.reaction != this.props.data.reaction) {
+      const el = $('#spyfall-user-'+this.props.identifier)
+      if (el.hasClass('show'))
+        el.removeClass('show')
+      el.toggleClass('show', 200, "easeOutSine")
     }
-
-    return box
   }
-
   render() {
+    const id = this.props.identifier
+
+    const player = this.props.username
+    const obj = this.props.data
+    const label = player ? (player.charAt(0)+'').toUpperCase() : '_'
+    const moji = memoji[obj.reaction]
+    const expression = twemoji.parse(moji ? moji : memoji[0], {
+      size: 72
+    })
+
+    const isUser = this.props.isplayer || false
+    const isConnected = obj.connected
+
+    const position = this.props.position || 'right-center'
+    const extra = this.props.extra || false
+
     return (
-      this.createBox()
+      <div className={'player-profile uk-text-center '+this.props.className} key={player} data-username={player}>
+        <div className={'player-avatar'+(isUser?' player-user':'')+(isConnected?' connected':'')}><div className="player-label">{label}</div></div>
+        <div uk-drop={'pos: '+position}>
+          <div className="uk-card uk-card-body uk-card-default">
+            {
+              !isUser &&
+              <div className="player-meta uk-margin-small-bottom">
+                <div className="uk-text-meta">Player Username</div>
+                <div className="uk-text-lead uk-text-bold">{player}</div>
+              </div>
+            }
+            {
+              !this.props.open &&
+              <div>
+                <div className="uk-text-meta">{isUser?'Your':'Player'} Score</div>
+                <div className="uk-text-lead uk-text-bold">{obj.score}</div>
+              </div>
+            }
+            {
+              isUser &&
+              <div className="uk-flex uk-flex-center uk-flex-wrap">
+                {this.props.reactButtons}
+              </div>
+            }
+            {
+              extra
+            }
+          </div>
+        </div>
+        <div id={"spyfall-user-react-"+this.props.identifier+"-"+player} className="player-reaction" dangerouslySetInnerHTML={{__html: expression}} />
+      </div>
     )
   }
+
 }
 
 class SpyfallGameBox extends React.Component {
@@ -712,8 +756,12 @@ class SpyfallGameBox extends React.Component {
       console.log(obj)
       this.setState(obj)
       this.socket.emit('open game', roomcode, (ack) => {
+        $('html').css('font-size', '0');
+
         if (ack != true) return this.displayError(ack)
         this.setState({connected: true})
+
+        $('html').css('font-size', '');
       })
     })
   }
@@ -745,6 +793,9 @@ class SpyfallGameBox extends React.Component {
     const roomcode = this.state.roomcode+''
     this.socket.emit('vote game', roomcode, vote, (ack) => {
       if (ack != true) return this.displayError(ack)
+
+      this.state.votes[this.state.username] = vote
+      this.setState({votes: this.state.votes})
     })
   }
 
@@ -834,6 +885,7 @@ class SpyfallGameBox extends React.Component {
 
   inputBox = () => {
     const phase = this.state.phase
+    const didvote = typeof this.state.votes[this.state.username] != 'undefined';
     const s = {
       normal: phase == 0,
       voting: phase == 3,
@@ -846,14 +898,15 @@ class SpyfallGameBox extends React.Component {
       queried: phase == 0 && this.state.input == this.state.username,
       compliance: phase == 4 && this.state.username != this.state.votingFor && this.state.username != this.state.votedBy
     }
+
     return (
-      <div className="game-input-box uk-margin-top">
+      <div className="game-input-box uk-margin-small-top no-shrink">
         {   (s.normal || s.setvote) &&
             <div className="uk-padding-small"><b>{ (s.setvote || s.queried) ? 'You' : (s.normal ? this.state.input : 'Someone') }</b> will <b>{s.setvote ? 'vote' : (s.asked ? 'answer' : 'question')}</b>.</div>
         }
         {
             (s.discussvoting) &&
-            <div><b>{this.state.votedBy}</b> accuses <b>{this.state.votingFor}</b> as the Spy!</div>
+            <div className="uk-padding-small"><b>{this.state.votedBy}</b> accuses <b>{this.state.votingFor}</b> as the Spy!</div>
         }
         { ((s.setvote) || (s.questioning)) &&
           this.targetBox()
@@ -866,8 +919,8 @@ class SpyfallGameBox extends React.Component {
         }
         {   s.compliance &&
           <span className="uk-margin-small-top uk-margin-small-bottom uk-display-inline-block">
-            <button onClick={() => {this.voteGame(true)}} className="uk-button uk-button-secondary uk-margin-left">Agree</button>
-            <button onClick={() => {this.voteGame(false)}} className="uk-button uk-button-secondary uk-margin-small-left">Disagree</button>
+            <button onClick={() => {this.voteGame(true)}} disabled={didvote} className="uk-button uk-button-secondary uk-margin-left">Agree</button>
+            <button onClick={() => {this.voteGame(false)}} disabled={didvote} className="uk-button uk-button-secondary uk-margin-small-left">Disagree</button>
           </span>
         }
       </div>
@@ -933,7 +986,7 @@ class SpyfallGameBox extends React.Component {
     }
 
     return (
-      <div id={"spyfall-role-box-"+this.props.key} className="spyfall-role-box uk-padding-small">
+      <div id={"game-role-box-"+this.props.identifier} className="game-role-box game-stretch uk-padding-small">
         <h2 className="uk-text-bold no-margin">{heading}</h2>
         { subtext }
       </div>
@@ -945,7 +998,25 @@ class SpyfallGameBox extends React.Component {
   playersBox = () => {
     const update = this.state.updateEmoji
     this.state.updateEmoji = ''
-    return (<SpyfallProfilesBox players={this.state.players} open={this.state.open} username={this.state.username} reactButtons={this.reactButtons} update={update} />)
+
+    const box = []
+    const players = this.state.players
+    const playerKeys = Object.keys(players)
+
+    const key = this.props.identifier
+    const open = this.state.open
+    const buttons = this.reactButtons
+
+    for (var i = 0; i < playerKeys.length; i++) {
+      const username = playerKeys[i]
+      if (username == this.state.username)
+        continue;
+
+      box.push(
+        <SpyfallProfileIcon data={players[username]} username={username} isplayer={false} key={key+'-'+username} identifier={key} open={open} reactButtons={buttons} />
+      )
+    }
+    return box
   }
 
   messageBox = () => {
@@ -961,9 +1032,9 @@ class SpyfallGameBox extends React.Component {
     var messages = ''
 
     if (s.normal && this.state.messages)
-      messages = <SpyfallMessageBox className="grow-h game-box" username={this.state.username} messages={this.state.messages} type="qa" title="Q & A" />
+      messages = <SpyfallMessageBox className="grow-h game-box" identifier={this.props.identifier} username={this.state.username} messages={this.state.messages} type="qa" title="Q & A" />
     else if (s.discussion) {
-      messages = <SpyfallMessageBox className="grow-h game-box" username={this.state.username} messages={this.state.discussion} type="discuss" title="Discussion" />
+      messages = <SpyfallMessageBox className="grow-h game-box" identifier={this.props.identifier} username={this.state.username} messages={this.state.discussion} type="discuss" title="Discussion" />
     } else {
       const list = []
       const locations = this.state.locations
@@ -980,7 +1051,7 @@ class SpyfallGameBox extends React.Component {
         list.push(' ')
       }
       messages =
-      <div className="game-messages grow-h uk-text-center uk-text-break game-locations uk-padding uk-card uk-card-body">
+      <div className="game-messages grow-h uk-text-center uk-text-break game-locations uk-padding uk-card uk-card-body scroll grow">
         <h2>Locations</h2>
         {list}
       </div>
@@ -991,49 +1062,51 @@ class SpyfallGameBox extends React.Component {
     )
   }
 
+  menuBox = () => {
+    return (
+      <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
+    )
+  }
+
   showMenu = () => {
     UIkit.offcanvas($('#offcanvas-overlay')).show()
   }
 
-  toggleRoleBox = () => {
-    const box = $('#spyfall-role-box-'+this.props.key)
-    const toggle = $('#spyfall-role-toggle'+this.props.key)
-    const shown = box.hasClass('show')
-    if (shown) {
-      toggle.removeClass('uk-active')
-      box.removeClass('show').one('transitionend', () => box.css('display', 'none'))
-    } else {
-      toggle.addClass('uk-active')
-      box.show().addClass('show')
-    }
-  }
-
   render() {
+    const username = this.state.username
     return (
       <div className="game-box grow-h uk-padding uk-padding-remove-horizontal">
       {this.state.connected ?
         <div className="game-box dir-c grow">
-          <div className="game-box">
-            <div className="game-box grow">
-              { this.roleBox() }
+          <div className="game-box no-shrink">
+            <div className="grow uk-position-relative uk-margin-small-right">
+              <div className="game-actions-wrap uk-position-relative">
+                { this.roleBox() }
+              </div>
             </div>
-            <div className="game-box">
+            <div className="game-box no-shrink">
               <div>
                 <div className="uk-position-relative game-actions-wrap">
-                  <button className="uk-button uk-button-primary game-initiate" disabled={this.state.initiated || this.state.hasAccused.indexOf(this.state.username) >= 0} onClick={this.initiateGame}>Initiate { this.state.game.role == 'spy' ?'Guess':'Suspicion'}</button>
+                  <button className="uk-button uk-button-primary game-initiate" disabled={this.state.initiated || this.state.hasAccused.indexOf(username) >= 0} onClick={this.initiateGame}>Initiate { this.state.game.role == 'spy' ?'Guess':'Suspicion'}</button>
                   <button className="uk-button uk-button-secondary game-toggler" onClick={this.toggleMessageBox}>
                     Toggle View
                   </button>
                 </div>
               </div>
-              <div className="" key={'menu'}>
-                <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
+              <div className="game-box no-shrink game-flex-center" key={'menu'}>
+                <SpyfallProfileIcon data={this.state.players[username]} username={username} isplayer={false} identifier={this.props.identifier} key={this.props.identifier+'-'+username} open={this.state.open} reactButtons={this.reactButtons} extra={ this.menuBox() } />
               </div>
             </div>
           </div>
           <div className="game-box grow uk-margin-left">
-            <div className="player-box">
-              {this.playersBox()}
+            <div className="player-box uk-margin-small-right">
+              <div className="game-stretch">
+                <div className="game-box game-stretch grow dir-c">
+                  <div className="grow scroll">
+                    {this.playersBox()}
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="game-box dir-c grow uk-position-relative">
               {
@@ -1041,18 +1114,19 @@ class SpyfallGameBox extends React.Component {
                 &&
                 <div className="game-box grow dir-c uk-position-relative">
                   <div className="spyfall-timer-position-wrap">
-                    <SpyfallTimer radius={25} interval={1000} length={this.state.timeoutLength} started={this.state.timeoutStarted} />
+                    <SpyfallTimer hidden={this.state.phase == 1} radius={30} identifier={this.props.identifier} interval={1000} length={this.state.timeoutLength} started={this.state.timeoutStarted} />
                   </div>
-                  <div id={"spyfall-message-"+this.props.key} className="game-box dir-c grow scroll">
-                    { this.messageBox()}
+                  <div id={"spyfall-message-"+this.props.identifier} className="game-box dir-c grow">
+                    { this.messageBox() }
                   </div>
+
                   { this.inputBox() }
                 </div>
               }
               { this.state.master && (this.state.open || this.state.phase == 1) &&
                 <button onClick={this.state.number < this.state.rounds ? (this.state.number == 0 ? this.startGame : this.newGame) : this.closeGame } className={"uk-button "+(this.state.number < this.state.rounds ? "uk-button-primary":"uk-button-danger")}>{this.state.number < this.state.rounds ? (this.state.number == 0 ? 'Start' : 'Proceed') : 'Close'}</button>
               }
-              <div className="uk-text-right uk-text-meta uk-margin-small"><a className="" onClick={toggleFullscreen}>Toggle Fullscrren</a> | User: <code>{this.state.username}</code> | Room: <code>{this.state.roomcode}</code></div>
+              <div className="uk-text-right uk-text-meta uk-margin-small"><a onClick={this.connectGame}>Reload</a> | <a className="" onClick={toggleFullscreen}>Toggle Fullscreen</a> | User: <code>{username}</code> | Room: <code>{this.state.roomcode}</code></div>
             </div>
           </div>
         </div>
