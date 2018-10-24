@@ -135,21 +135,40 @@ img.emoji {
 	display: block;
 }
 
-html.in-game {
-  &, body {
+html, body {
     height: 100%;
+}
+
+body {
+  display: flex;
+
+  header {
+    flex-shrink: 0;
+    overflow-y: auto;
   }
+
+  .body-wrapper {
+    flex-grow: 1;
+    display: flex;
+    overflow-y: auto;
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+html.in-game {
+
   body {
     display: flex;
     flex-direction: column;
   }
-  body > .uk-container {
+  .body-wrapper {
     flex: 1 1 auto;
-    flex-direction: column;
+
     width: 100%;
     margin: 0;
-    display: flex;
-    box-sizing: border-box;
     max-width: none;
   }
 
@@ -172,6 +191,11 @@ html.in-game {
     display: flex;
     align-items: stretch;
     justify-content: stretch;
+  }
+
+  .game-box-center {
+    align-items: center;
+    justify-content: center;
   }
 
   .dir-c {
@@ -198,7 +222,7 @@ html.in-game {
   }
 
   .scroll {
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 0;
   }
 

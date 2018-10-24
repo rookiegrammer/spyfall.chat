@@ -367,7 +367,7 @@ class SpyfallProfileIcon extends React.Component {
       size: 72
     })
 
-    const isUser = this.props.isplayer || false
+    const isUser = this.props.isPlayer || false
     const isConnected = obj.connected
 
     const position = this.props.position || 'right-center'
@@ -415,6 +415,7 @@ class SpyfallGameBox extends React.Component {
     super(props);
     this.state = {
       console: null,
+      checkedin: false,
       connected: false,
       roomcode: '',
       target: '',
@@ -451,16 +452,19 @@ class SpyfallGameBox extends React.Component {
       timerDelta: 0,
       timeoutStarted: null,
       timeoutLength: 30,
-      username: '',
+      username: null,
       victory: null,
       votedBy: '',
       votes: {},
       votingFor: ''
     }
 
+    const self = this
     document.addEventListener("keydown", function(event) {
       if ((event.keyCode == 13 || event.which == 13) && event.altKey) {
         toggleFullscreen()
+      } else if (event.keyCode == 13 || event.which == 13) {
+        self.defaultAction()()
       }
     }, false)
 
@@ -480,7 +484,16 @@ class SpyfallGameBox extends React.Component {
     this.createReactionModule()
   }
 
+  componentDidMount = () => {
+    this.socket.emit('whoami game', (ack) => {
+      this.setState({username: ack, checkedin: true})
+      console.log(ack)
+    })
+  }
+
   establish = () => {
+    if ( this.socket && this.socket.connected ) return
+
     if ( this.socket && this.socket.socket)
       this.socket.socket.connect()
     else {
@@ -915,7 +928,7 @@ class SpyfallGameBox extends React.Component {
           <input className="uk-input uk-margin-small-top uk-margin-small-bottom" type="text" name="text" onChange={this.handleInputChange} value={this.state.text} placeholder={ s.queried ? (s.asked ? 'Answer' : 'Question') : 'Discuss'} />
         }
         { (s.queried  || s.setvote || s.discuss ) &&
-          <button onClick={s.queried ? this.sendQuery : (s.setvote ? this.suspectGame : this.discussGame ) } className="uk-button uk-button-secondary uk-margin-small-top uk-margin-small-bottom">{ s.queried ? (s.asked ? 'Reply' : 'Ask') : (s.voting ? 'Vote' : 'Send') }</button>
+          <button onClick={ this.defaultAction() } className="uk-button uk-button-secondary uk-margin-small-top uk-margin-small-bottom">{ s.queried ? (s.asked ? 'Reply' : 'Ask') : (s.voting ? 'Vote' : 'Send') }</button>
         }
         {   s.compliance &&
           <span className="uk-margin-small-top uk-margin-small-bottom uk-display-inline-block">
@@ -925,6 +938,19 @@ class SpyfallGameBox extends React.Component {
         }
       </div>
     )
+  }
+
+  defaultAction = () => {
+    const phase = this.state.phase
+
+    if (!this.state.connected)
+        return this.connectGame
+    else if (phase == 0 && this.state.input == this.state.username)
+        return this.sendQuery
+    else if (phase == 3 && this.state.votedBy == this.state.username)
+        return this.suspectGame
+    else
+        return this.discussGame
   }
 
   toggleMessageBox = () => {
@@ -1064,7 +1090,7 @@ class SpyfallGameBox extends React.Component {
 
   menuBox = () => {
     return (
-      <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
+      <button onClick={this.showMenu} className="uk-button uk-button-primary uk-margin-small-top uk-width-1-1">Menu</button>
     )
   }
 
@@ -1094,7 +1120,7 @@ class SpyfallGameBox extends React.Component {
                 </div>
               </div>
               <div className="game-box no-shrink game-flex-center" key={'menu'}>
-                <SpyfallProfileIcon data={this.state.players[username]} username={username} isplayer={false} identifier={this.props.identifier} key={this.props.identifier+'-'+username} open={this.state.open} reactButtons={this.reactButtons} extra={ this.menuBox() } />
+                <SpyfallProfileIcon data={this.state.players[username]} username={username} isplayer={false} identifier={this.props.identifier} key={this.props.identifier+'-'+username} open={this.state.open} isPlayer={true} reactButtons={this.reactButtons} extra={ this.menuBox() } />
               </div>
             </div>
           </div>
@@ -1130,12 +1156,27 @@ class SpyfallGameBox extends React.Component {
             </div>
           </div>
         </div>
-        : <div className="game-box dir-c grow-w">
-            <div className="" key={'menu'}>
-              <a className="menu-button" onClick={this.showMenu}><span className="menu-button-label" uk-icon="icon: menu; ratio: 1.5"></span></a>
+        : <div className="game-box dir-c grow-w game-box-center">
+            <div style={{'min-width': '360px'}}>
+              {
+                this.state.checkedin ?
+                  <div>
+                    <div class="uk-navbar-item uk-logo">spyfall.chat</div>
+                    {
+                      !this.state.username &&
+                      <div className="uk-alert-danger uk-padding-small">
+                        You may need to <a href="/signin">sign in</a>.
+                      </div>
+                    }
+                    <input className="uk-input uk-margin" type="text" onChange={this.handleInputChange} placeholder="Room Code" name="roomcode" value={this.state.roomcode} />
+                    <button onClick={this.connectGame} className="uk-button uk-button-primary uk-width-1-1">Connect</button>
+                  </div>
+                : <div>
+                    Checking In...
+                  </div>
+              }
+              <button onClick={this.showMenu} className="uk-button uk-button-secondary uk-margin-small-top uk-width-1-1">Menu</button>
             </div>
-            <input className="uk-input uk-margin" type="text" onChange={this.handleInputChange} placeholder="Room Code" name="roomcode" value={this.state.roomcode} />
-            <button onClick={this.connectGame} className="uk-button uk-button-primary">Connect</button>
           </div>
       }
       </div>

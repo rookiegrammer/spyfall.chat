@@ -4212,11 +4212,11 @@ iframe.uk-cover { pointer-events: none; }
   .github { display: block; margin: 1em auto; }
   .codrops-links { margin: 0; } }
 
-.menu--dustu .menu__item { font-family: 'Work Sans', serif; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; margin: 2em 0; }
+.menu--dustu .menu__item { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; margin: 2em 0; }
 
 .menu--dustu .menu__item-name { font-size: 1.75em; font-weight: bold; overflow: hidden; padding: 0 0.25em; text-transform: uppercase; color: #000; }
 
-.menu--dustu .menu__item-name::before, .menu--dustu .menu__item-name::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #eb2141; -webkit-transform: translate3d(-100%, 0, 0) translate3d(-1px, 0, 0); transform: translate3d(-100%, 0, 0) translate3d(-1px, 0, 0); -webkit-transition: -webkit-transform 0.7s; transition: -webkit-transform 0.7s; -o-transition: transform 0.7s; transition: transform 0.7s; transition: transform 0.7s, -webkit-transform 0.7s; -webkit-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); -o-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
+.menu--dustu .menu__item-name::before, .menu--dustu .menu__item-name::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1e87f0; -webkit-transform: translate3d(-100%, 0, 0) translate3d(-1px, 0, 0); transform: translate3d(-100%, 0, 0) translate3d(-1px, 0, 0); -webkit-transition: -webkit-transform 0.7s; transition: -webkit-transform 0.7s; -o-transition: transform 0.7s; transition: transform 0.7s; transition: transform 0.7s, -webkit-transform 0.7s; -webkit-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); -o-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
 
 .menu--dustu .menu__item:hover .menu__item-name::before { -webkit-transform: translate3d(100%, 0, 0) translate3d(1px, 0, 0); transform: translate3d(100%, 0, 0) translate3d(1px, 0, 0); }
 
@@ -4227,6 +4227,12 @@ iframe.uk-cover { pointer-events: none; }
 .menu--dustu .menu__item-label { font-size: 1em; margin: 0.5em 0 0 0; margin-top: 0.25em; padding: 0.5em; color: #ccc; -webkit-transition: color 0.7s; -o-transition: color 0.7s; transition: color 0.7s; -webkit-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); -o-transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
 
 .menu--dustu .menu__item:hover .menu__item-label { color: #000; }
+
+.menu--dustu.dutsu-alternate .menu__item-name { color: #fff; }
+
+.menu--dustu.dutsu-alternate .menu__item-label { color: #444; }
+
+.menu--dustu.dutsu-alternate .menu__item:hover .menu__item-label { color: #fff; }
 
 img.emoji { height: 1em; width: 1em; margin: 0 .05em 0 .1em; vertical-align: -0.1em; }
 
@@ -4270,17 +4276,25 @@ img.emoji { height: 1em; width: 1em; margin: 0 .05em 0 .1em; vertical-align: -0.
 
 .game-talk-person { margin-top: .2em; color: #222; font-size: .7em; font-weight: 900; text-transform: uppercase; display: block; }
 
-html.in-game, html.in-game body { height: 100%; }
+html, body { height: 100%; }
+
+body { display: -webkit-box; display: -ms-flexbox; display: flex; }
+
+body header { -ms-flex-negative: 0; flex-shrink: 0; overflow-y: auto; }
+
+body .body-wrapper { -webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; display: -webkit-box; display: -ms-flexbox; display: flex; overflow-y: auto; -webkit-box-sizing: border-box; box-sizing: border-box; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: stretch; -ms-flex-align: stretch; align-items: stretch; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
 
 html.in-game body { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
 
-html.in-game body > .uk-container { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; width: 100%; margin: 0; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-sizing: border-box; box-sizing: border-box; max-width: none; }
+html.in-game .body-wrapper { -webkit-box-flex: 1; -ms-flex: 1 1 auto; flex: 1 1 auto; width: 100%; margin: 0; max-width: none; }
 
 html.in-game #game-container, html.in-game .game-stretch { width: 100%; height: 100%; }
 
 html.in-game .game { height: 100%; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: stretch; -ms-flex-pack: stretch; justify-content: stretch; -webkit-box-align: stretch; -ms-flex-align: stretch; align-items: stretch; -webkit-box-sizing: border-box; box-sizing: border-box; }
 
 html.in-game .game-box { -webkit-box-sizing: border-box; box-sizing: border-box; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: stretch; -ms-flex-align: stretch; align-items: stretch; -webkit-box-pack: stretch; -ms-flex-pack: stretch; justify-content: stretch; }
+
+html.in-game .game-box-center { -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; }
 
 html.in-game .dir-c { -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
 
@@ -4292,7 +4306,7 @@ html.in-game .grow { -webkit-box-flex: 1; -ms-flex-positive: 1; flex-grow: 1; -m
 
 html.in-game .no-shrink { -ms-flex-negative: 0; flex-shrink: 0; }
 
-html.in-game .scroll { overflow-y: scroll; height: 0; }
+html.in-game .scroll { overflow-y: auto; height: 0; }
 
 html.in-game .game-flex-center { -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; }
 

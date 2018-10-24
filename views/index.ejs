@@ -1,9 +1,13 @@
 <% include partials/head %>
 
-<form action="/api/create" method="post">
-  <input type="hidden" name="webapp" value="true">
-  <button type="submit" class="uk-button uk-button-primary">Create a Room</button>
-</form>
+<div class="uk-card uk-card-primary uk-card-hover uk-card-body">
+  <h1 class="uk-card-title">Create a <strong>spyfall.chat</strong> room</h1>
+  <form action="/api/create" method="post">
+    <input type="hidden" name="webapp" value="true">
+    <button type="submit" class="uk-button uk-button-primary">Create a Room</button>
+  </form>
+</div>
+
 
 <script src="/js/jquery-latest.min.js"></script>
 

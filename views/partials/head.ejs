@@ -35,14 +35,10 @@
   <body id="body">
     <% if (typeof header == 'undefined' || header == true) { %>
     <header>
-      <nav class="uk-navbar-container" uk-navbar>
-        <div class="uk-navbar-left">
-          <ul class="uk-navbar-nav">
-            <li><a class="uk-navbar-item uk-logo" href="/">spyfall.chat</a></li>
-            <% include menu.ejs %>
-          </ul>
-        </div>
+      <nav class="menu menu--dustu uk-margin-left">
+        <a class="uk-navbar-item uk-logo" href="/">spyfall.chat</a>
+        <% include menu.ejs %>
       </nav>
     </header>
     <% } %>
-    <div class="uk-container game-stretch">
+    <div class="body-wrapper uk-container game-stretch">

@@ -4,6 +4,9 @@ function SpyfallConnection(socket) {
   self.socket = socket
   self.space = global.sck.game
 
+  self.socket.on('whoami game', function(ack) {
+    ack( self.getUser() )
+  })
   self.socket.on('load game', function() {
     self.eventLoadGame.apply(self, arguments)
   })
