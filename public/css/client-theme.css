@@ -1,7 +1,7 @@
 @charset "UTF-8";
 /* ======================================================================== Component: Base ========================================================================== */
 /* 1. Set `font-size` to support `rem` units Not using `font` property because a leading hyphen (e.g. -apple-system) causes the font to break in IE11 and Edge 2. Prevent adjustments of font size after orientation changes in iOS. 3. Style */
-html { /* 1 */ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px; font-weight: normal; line-height: 1.5; /* 2 */ -webkit-text-size-adjust: 100%; /* 3 */ background: #fff; color: #666; }
+html { /* 1 */ font-family: Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px; font-weight: normal; line-height: 1.5; /* 2 */ -webkit-text-size-adjust: 100%; /* 3 */ background: #fff; color: #666; }
 
 /* Remove the margin in all browsers. */
 body { margin: 0; }
@@ -71,7 +71,7 @@ p, ul, ol, dl, pre, address, fieldset, figure { margin: 0 0 20px 0; }
 * + p, * + ul, * + ol, * + dl, * + pre, * + address, * + fieldset, * + figure { margin-top: 20px; }
 
 /* Headings ========================================================================== */
-h1, .uk-h1, h2, .uk-h2, h3, .uk-h3, h4, .uk-h4, h5, .uk-h5, h6, .uk-h6 { margin: 0 0 20px 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-weight: normal; color: #333; text-transform: none; }
+h1, .uk-h1, h2, .uk-h2, h3, .uk-h3, h4, .uk-h4, h5, .uk-h5, h6, .uk-h6 { margin: 0 0 20px 0; font-family: Roboto, "Helvetica Neue", Arial, sans-serif; font-weight: normal; color: #333; text-transform: none; }
 
 /* Add margin if adjacent element */
 * + h1, * + .uk-h1, * + h2, * + .uk-h2, * + h3, * + .uk-h3, * + h4, * + .uk-h4, * + h5, * + .uk-h5, * + h6, * + .uk-h6 { margin-top: 40px; }
@@ -1569,7 +1569,7 @@ ul.uk-nav-sub { padding: 5px 0 5px 15px; }
 .uk-navbar-left, .uk-navbar-right, .uk-navbar-center:only-child { -ms-flex-wrap: wrap; flex-wrap: wrap; }
 
 /* Items 1. Center content vertically and horizontally 2. Dimensions 3. Style 4. Required for `a` */
-.uk-navbar-nav > li > a, .uk-navbar-item, .uk-navbar-toggle { /* 1 */ display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; /* 2 */ -webkit-box-sizing: border-box; box-sizing: border-box; height: 80px; padding: 0 15px; /* 3 */ font-size: 0.875rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 4 */ text-decoration: none; }
+.uk-navbar-nav > li > a, .uk-navbar-item, .uk-navbar-toggle { /* 1 */ display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; /* 2 */ -webkit-box-sizing: border-box; box-sizing: border-box; height: 80px; padding: 0 15px; /* 3 */ font-size: 0.875rem; font-family: Roboto, "Helvetica Neue", Arial, sans-serif; /* 4 */ text-decoration: none; }
 
 /* Nav items */
 .uk-navbar-nav > li > a { color: #999; text-transform: uppercase; -webkit-transition: 0.1s ease-in-out; -o-transition: 0.1s ease-in-out; transition: 0.1s ease-in-out; -webkit-transition-property: color, background-color; -o-transition-property: color, background-color; transition-property: color, background-color; }
@@ -3328,7 +3328,7 @@ iframe.uk-cover { pointer-events: none; }
 
 /* Logo ========================================================================== */
 /* 1. Required for `a` */
-.uk-logo { font-size: 1.5rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #666; /* 1 */ text-decoration: none; }
+.uk-logo { font-size: 1.5rem; font-family: Roboto, "Helvetica Neue", Arial, sans-serif; color: #666; /* 1 */ text-decoration: none; }
 
 /* Hover + Focus */
 .uk-logo:hover, .uk-logo:focus { color: #666; outline: none; /* 1 */ text-decoration: none; }

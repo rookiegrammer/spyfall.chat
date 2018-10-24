@@ -263,7 +263,7 @@ class SpyfallMessageBox extends React.Component {
 
     var parent = $('#spyfall-message-'+this.props.identifier);
     var child = $('#spyfall-message-box-'+this.props.identifier);
-    parent.animate({ scrollTop: child.outerHeight()-parent.height() }, 1000 );
+    parent.delay(500).animate({ scrollTop: child.outerHeight()-parent.outerHeight() }, 1000 );
   }
 
   qaBox = () => {
@@ -332,7 +332,7 @@ class SpyfallMessageBox extends React.Component {
   render() {
     const title = this.props.title ? this.props.title : 'Q & A'
     return (
-      <div id={"spyfall-message-box-"+this.props.identifier} className={"game-messages uk-card uk-card-body uk-card-secondary uk-card-hover uk-text-center scroll grow type-"+this.props.type}>
+      <div id={"spyfall-message-box-"+this.props.identifier} className={"game-messages uk-card uk-card-body uk-card-secondary uk-card-hover uk-text-center grow type-"+this.props.type}>
         <div className="uk-margin-bottom uk-text-bold">{title}</div>
         {
           this.props.type == 'qa' ? this.qaBox() : this.discussBox()
@@ -363,9 +363,7 @@ class SpyfallProfileIcon extends React.Component {
     const obj = this.props.data
     const label = player ? (player.charAt(0)+'').toUpperCase() : '_'
     const moji = memoji[obj.reaction]
-    const expression = twemoji.parse(moji ? moji : memoji[0], {
-      size: 72
-    })
+    const expression = twemoji.parse(moji ? moji : memoji[0])
 
     const isUser = this.props.isPlayer || false
     const isConnected = obj.connected
@@ -1142,7 +1140,7 @@ class SpyfallGameBox extends React.Component {
                   <div className="spyfall-timer-position-wrap">
                     <SpyfallTimer hidden={this.state.phase == 1} radius={30} identifier={this.props.identifier} interval={1000} length={this.state.timeoutLength} started={this.state.timeoutStarted} />
                   </div>
-                  <div id={"spyfall-message-"+this.props.identifier} className="game-box dir-c grow">
+                  <div id={"spyfall-message-"+this.props.identifier} className="game-box dir-c grow scroll">
                     { this.messageBox() }
                   </div>
 
@@ -1157,11 +1155,11 @@ class SpyfallGameBox extends React.Component {
           </div>
         </div>
         : <div className="game-box dir-c grow-w game-box-center">
-            <div style={{'min-width': '360px'}}>
+            <div style={{'minWidth': '360px'}}>
               {
                 this.state.checkedin ?
                   <div>
-                    <div class="uk-navbar-item uk-logo">spyfall.chat</div>
+                    <div className="uk-navbar-item uk-logo">spyfall.chat</div>
                     {
                       !this.state.username &&
                       <div className="uk-alert-danger uk-padding-small">
