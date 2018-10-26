@@ -7,6 +7,32 @@ function SpyfallConnection(socket) {
   self.socket.on('whoami game', function(ack) {
     ack( self.getUser() )
   })
+  self.socket.on('available game', function(ack) {
+    const user = self.getUser()
+    if (!user) return ack(false)
+
+    global.fn.getRooms(user, (err, list) => {
+      if (err) return ack(false)
+
+      const rms = [];
+      list.forEach(function (room) {
+        const players = global.fn.mapKeys(room.players)
+        const obj = {
+          id: room._id,
+          players: players,
+          deck: room.deck,
+          rounds: room.rounds,
+          chat: room.chat,
+          roundLength: room.roundLength,
+          timeoutLength: room.timeoutLength,
+          number: room.currentRound.number,
+          started: room.timerStarted
+        }
+        rms.push(obj)
+      })
+      ack(rms)
+    })
+  })
   self.socket.on('load game', function() {
     self.eventLoadGame.apply(self, arguments)
   })
@@ -156,10 +182,15 @@ SpyfallConnection.prototype.scoreAndCheck = function(roomcode, scoring, username
 SpyfallConnection.prototype.eventLoadGame = function(roomcode, ack) {
   const username = this.getUser()
   if ( !username ) return ack(false)
+
   const socketId = this.socket.id
 
-  global.fn.connectRoom(roomcode, username, (err, stateobj) => {
-    if (err) return ack(false)
+  global.fn.connectRoom(roomcode, username, (err, stateobj, exists) => {
+    if (err) {
+      ack(false)
+      this.socket.emit('')
+      return
+    }
 
     global.fn.registerConnection(socketId, username, function(registered) {
       return ack(stateobj)

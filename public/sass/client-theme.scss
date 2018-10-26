@@ -11,6 +11,7 @@
 $tertiary-color: #F6F6F6;
 
 @import "plugin-dutsu";
+@import "plugin-loader";
 
 @mixin msgbubble() {
   padding: 0.5rem 1rem;
@@ -155,6 +156,12 @@ body {
     justify-content: center;
     align-items: stretch;
     flex-direction: column;
+  }
+}
+
+.modal-loadable.loaded {
+  .modal-loader {
+    display: none;
   }
 }
 

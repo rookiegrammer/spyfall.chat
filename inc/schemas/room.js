@@ -145,7 +145,10 @@ global.fn.createRoom = function(master, callback, options) {
 }
 
 global.fn.getRooms = function(user, callback) {
-  Room.find({ players: user }, callback)
+  const field = "players."+user
+  const query = {}
+  query[field] = { $exists: true }
+  Room.find(query, callback)
 }
 
 global.fn.getLastMessage = function(roomcode, callback) {
@@ -653,11 +656,11 @@ global.fn.userInterrupt = function(roomcode, username, callback) {
 global.fn.insideRoom = function(roomcode, username, callback) {
   Room.findById(roomcode, function(err, room) {
     if (err)
-      return callback(err, null)
+      return callback(err, null, false)
     if (!room || !room.players) {
       const find_error = new Error('Room not found.')
       find_error.status = 404
-      return callback(find_error, null)
+      return callback(find_error, null, false)
     }
 
 
@@ -666,18 +669,18 @@ global.fn.insideRoom = function(roomcode, username, callback) {
     if (!player) {
       const find_error = new Error('Player in room not found.')
       find_error.status = 404
-      return callback(find_error, null)
+      return callback(find_error, null, true)
     }
 
-    callback(null, room)
+    callback(null, room, true)
   })
 }
 
 global.fn.connectRoom = function(roomcode, username, callback) {
 
-  global.fn.insideRoom(roomcode, username, function(err, room) {
+  global.fn.insideRoom(roomcode, username, function(err, room, exists) {
     if (err)
-      return callback(err, null)
+      return callback(err, null, exists)
 
     const isMaster = (username == room.master)
 
@@ -756,7 +759,7 @@ global.fn.connectRoom = function(roomcode, username, callback) {
 
       stateObject.players = playersObject
 
-      callback(null, stateObject)
+      callback(null, stateObject, exists)
     })
   })
 }

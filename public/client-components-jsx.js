@@ -6,7 +6,8 @@ const memoji = [
   '😗',
   '😍',
   '🧐',
-  '🤓'
+  '🤓',
+  '🕵️‍♂️'
 ]
 
 function toggleFullscreen(event) {
@@ -485,7 +486,6 @@ class SpyfallGameBox extends React.Component {
   componentDidMount = () => {
     this.socket.emit('whoami game', (ack) => {
       this.setState({username: ack, checkedin: true})
-      console.log(ack)
     })
   }
 
@@ -1096,6 +1096,35 @@ class SpyfallGameBox extends React.Component {
     UIkit.offcanvas($('#offcanvas-overlay')).show()
   }
 
+  renderGameList = () => {
+    const list = $('#spyfall-game-list')
+    const content = $('#spyfall-game-list-content')
+    const connectGame = (id) => {
+      this.state.roomcode = id
+      this.connectGame()
+    };
+
+    UIkit.modal(list[0]).show()
+
+    this.socket.emit('available game', (games) => {
+      const elems = []
+
+      for (var i = 0; i < games.length; i++) {
+        const game = games[i]
+        elems.push(
+          <a className="uk-badge uk-margin-small-right" key={'game-list'+i} onClick={() => connectGame(game.id)}> {game.id} </a>
+        )
+      }
+      var html = <div>
+        {elems}
+      </div>
+      ReactDOM.render(html, content[0])
+      list.addClass('loaded')
+    })
+
+
+  }
+
   render() {
     const username = this.state.username
     return (
@@ -1169,10 +1198,12 @@ class SpyfallGameBox extends React.Component {
                     <input className="uk-input uk-margin" type="text" onChange={this.handleInputChange} placeholder="Room Code" name="roomcode" value={this.state.roomcode} />
                     <button onClick={this.connectGame} className="uk-button uk-button-primary uk-width-1-1">Connect</button>
                   </div>
-                : <div>
-                    Checking In...
+                : <div className="uk-text-center">
+                    <div className="uk-margin-small-bottom">Checking You In...</div>
+                    <div className="lds-ripple"><div></div><div></div></div>
                   </div>
               }
+              <button onClick={this.renderGameList} className="uk-button uk-button-secondary uk-margin-small-top uk-width-1-1">List</button>
               <button onClick={this.showMenu} className="uk-button uk-button-secondary uk-margin-small-top uk-width-1-1">Menu</button>
             </div>
           </div>
