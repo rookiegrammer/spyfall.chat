@@ -138,6 +138,9 @@ class SpyfallTimer extends React.Component {
     this.props = props
     this.count = 0
 
+    this.Ecircle = React.createRef();
+    this.Etext = React.createRef();
+
     const self = this
     $(window).resize(function(){
       self.forceUpdate()
@@ -176,20 +179,22 @@ class SpyfallTimer extends React.Component {
 
   update = () => {
     const elapsed = this.props.length - this.count
-    $('#spyfall-timer-sector-'+this.props.identifier).css('stroke-dasharray', (elapsed*this.circumference/this.props.length)+' '+this.circumference );
-    $('#spyfall-timer-text-'+this.props.identifier).html(this.count > 0 ? this.count : 0)
+    if (this.Ecircle && this.Etext) {
+      $(this.Ecircle.current).css('stroke-dasharray', (elapsed*this.circumference/this.props.length)+' '+this.circumference );
+      $(this.Etext.current).html(this.count > 0 ? this.count : 0)
+    }
   }
 
   render() {
     const x1 = window.innerWidth > 640 ? this.props.radius : this.props.radius * 0.7
     const x2 = x1 + x1
     return (
-      <div hidden={this.props.hidden} className="spyfall-timer-wrap">
-        <svg className="spyfall-timer-circle" width={x2} height={x2}>
-          <circle className="spyfall-timer-sector" id={"spyfall-timer-sector-"+this.props.identifier} style={{'strokeWidth': x2}} r={x1} cx={x1} cy={x1} />
-          <circle className="spyfall-timer-bg" r={x1*0.65} cx={x1} cy={x1} />
+      <div hidden={this.props.hidden} className="round-timer-wrap">
+        <svg className="round-timer-circle" width={x2} height={x2}>
+          <circle className="round-timer-sector" ref={this.Ecircle} style={{'strokeWidth': x2}} r={x1} cx={x1} cy={x1} />
+          <circle className="round-timer-bg" r={x1*0.65} cx={x1} cy={x1} />
         </svg>
-        <span className="spyfall-timer-text" id={"spyfall-timer-text-"+this.props.identifier} style={{top: (x1+'px'), left: (x1+'px')}} >
+        <span className="round-timer-text" ref={this.Etext} style={{top: (x1+'px'), left: (x1+'px')}} >
         </span>
       </div>
     )
@@ -203,6 +208,8 @@ class SpyfallProgressTimer extends React.Component {
     super(props)
     this.props = props
     this.count = 0
+
+    this.bar = React.createRef()
   }
 
   componentDidMount = () => {
@@ -235,7 +242,17 @@ class SpyfallProgressTimer extends React.Component {
 
   update = () => {
     const elapsed = this.props.length - this.count
+    if (this.bar)
+      this.bar.current.css('width', (elapsed*100/this.props.length)+'%')
+  }
 
+  render() {
+    return (
+      <div className="prog-timer-bg">
+        <div ref={this.bar} className="prog-timer-bar">
+        </div>
+      </div>
+    )
   }
 }
 
@@ -243,15 +260,17 @@ class SpyfallMessageBox extends React.Component {
   constructor(props) {
     super(props);
     // username, messages, type
+    this.messagebox = React.createRef();
+
+    this.Escroll = <div key="scroller" ref={el => this.scroller = el}></div>
   }
 
   lastMessagesLength = 0
   lastType = ''
 
   componentDidMount = () => {
-    var parent = $('#spyfall-message-'+this.props.identifier);
-    var child = $('#spyfall-message-box-'+this.props.identifier);
-    parent.scrollTop( child.outerHeight()-parent.height() );
+    if (this.scroller)
+      this.scroller.scrollIntoView()
 
     this.lastMessagesLength = this.props.messages.length;
     this.lastType = this.props.type;
@@ -261,10 +280,8 @@ class SpyfallMessageBox extends React.Component {
     if ( this.lastMessagesLength == this.props.messages.length
       && this.lastType == this.props.type )
       return
-
-    var parent = $('#spyfall-message-'+this.props.identifier);
-    var child = $('#spyfall-message-box-'+this.props.identifier);
-    parent.delay(500).animate({ scrollTop: child.outerHeight()-parent.outerHeight() }, 1000 );
+    if (this.scroller)
+      this.scroller.scrollIntoView()
   }
 
   qaBox = () => {
@@ -297,6 +314,7 @@ class SpyfallMessageBox extends React.Component {
         'No Messages :\'('
       )
     }
+    else messages.push(this.Escroll)
     return messages
   }
 
@@ -327,17 +345,20 @@ class SpyfallMessageBox extends React.Component {
         'No Messages :\'('
       )
     }
+    else messages.push(this.Escroll)
     return messages
   }
 
   render() {
     const title = this.props.title ? this.props.title : 'Q & A'
     return (
-      <div id={"spyfall-message-box-"+this.props.identifier} className={"game-messages uk-card uk-card-body uk-card-secondary uk-card-hover uk-text-center grow type-"+this.props.type}>
-        <div className="uk-margin-bottom uk-text-bold">{title}</div>
-        {
-          this.props.type == 'qa' ? this.qaBox() : this.discussBox()
-        }
+      <div className="game-box dir-c grow scroll">
+        <div ref={this.messagebox} className={"game-messages uk-card uk-card-body uk-card-secondary uk-card-hover uk-text-center grow type-"+this.props.type}>
+          <div className="uk-margin-bottom uk-text-bold">{title}</div>
+          {
+            this.props.type == 'qa' ? this.qaBox() : this.discussBox()
+          }
+        </div>
       </div>
     )
   }
@@ -348,13 +369,16 @@ class SpyfallProfileIcon extends React.Component {
     super(props);
     // data, username, key, isPlayer
     // open, reactButtons
+    this.crntReact = props.data.reaction
+    this.reactref = React.createRef()
   }
   componentDidUpdate = (prevProps, prevState) => {
-    if (prevProps.data.reaction != this.props.data.reaction) {
-      const el = $('#spyfall-user-'+this.props.identifier)
+    if (this.crntReact != this.props.data.reaction) {
+      const el = $(this.reactref.current)
       if (el.hasClass('show'))
         el.removeClass('show')
       el.toggleClass('show', 200, "easeOutSine")
+      this.crntReact = this.props.data.reaction
     }
   }
   render() {
@@ -402,7 +426,7 @@ class SpyfallProfileIcon extends React.Component {
             }
           </div>
         </div>
-        <div id={"spyfall-user-react-"+this.props.identifier+"-"+player} className="player-reaction" dangerouslySetInnerHTML={{__html: expression}} />
+        <div ref={this.reactref} className="player-reaction" dangerouslySetInnerHTML={{__html: expression}} />
       </div>
     )
   }
@@ -1075,15 +1099,15 @@ class SpyfallGameBox extends React.Component {
         list.push(' ')
       }
       messages =
-      <div className="game-messages grow-h uk-text-center uk-text-break game-locations uk-padding uk-card uk-card-body scroll grow">
-        <h2>Locations</h2>
-        {list}
+      <div className="game-box dir-c grow scroll">
+        <div className="game-messages grow-h uk-text-center uk-text-break game-locations uk-padding uk-card uk-card-body scroll grow">
+          <h2>Locations</h2>
+          {list}
+        </div>
       </div>
     }
 
-    return (
-      messages
-    )
+    return messages
   }
 
   menuBox = () => {
@@ -1102,6 +1126,7 @@ class SpyfallGameBox extends React.Component {
     const connectGame = (id) => {
       this.state.roomcode = id
       this.connectGame()
+      UIkit.modal(list[0]).hide()
     };
 
     UIkit.modal(list[0]).show()
@@ -1166,12 +1191,10 @@ class SpyfallGameBox extends React.Component {
                 !this.state.open
                 &&
                 <div className="game-box grow dir-c uk-position-relative">
-                  <div className="spyfall-timer-position-wrap">
+                  <div className="round-timer-position-wrap">
                     <SpyfallTimer hidden={this.state.phase == 1} radius={30} identifier={this.props.identifier} interval={1000} length={this.state.timeoutLength} started={this.state.timeoutStarted} />
                   </div>
-                  <div id={"spyfall-message-"+this.props.identifier} className="game-box dir-c grow scroll">
-                    { this.messageBox() }
-                  </div>
+                  { this.messageBox() }
 
                   { this.inputBox() }
                 </div>
@@ -1203,7 +1226,10 @@ class SpyfallGameBox extends React.Component {
                     <div className="lds-ripple"><div></div><div></div></div>
                   </div>
               }
-              <button onClick={this.renderGameList} className="uk-button uk-button-secondary uk-margin-small-top uk-width-1-1">List</button>
+              {
+                this.state.username &&
+                <button onClick={this.renderGameList} className="uk-button uk-button-secondary uk-margin-small-top uk-width-1-1">List</button>
+              }
               <button onClick={this.showMenu} className="uk-button uk-button-secondary uk-margin-small-top uk-width-1-1">Menu</button>
             </div>
           </div>
