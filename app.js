@@ -13,6 +13,8 @@ const uintformat = require('biguint-format')
 const MongoStore = require('connect-mongo')(session);
 const datediff = require('date-diff')
 
+global.ip = require('ip');
+
 if (data.version)
   console.log('Spyfall.Chat\nDecks version '+data.version)
 
@@ -126,3 +128,5 @@ global.sck.msg.on('connection', (socket) => {
      })
 	})
 })
+
+require('./inc/discovery')

@@ -28,6 +28,26 @@ img.emoji {
    vertical-align: -0.1em;
 }
 
+.float-chat {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  .float-chat-icon {
+    display: block;
+  }
+  .msg-box {
+    display: none;
+  }
+  &.open {
+    .float-chat-icon {
+      display: none;
+    }
+    .msg-box {
+      display: block;
+    }
+  }
+}
+
 .player-avatar, .menu-button {
   display: flex;
   align-items: center;
@@ -102,6 +122,11 @@ img.emoji {
 .msg-outbound .msg-wrapper {
   background-color: $global-primary-background;
   color: $global-inverse-color;
+}
+
+.game-input-box {
+  background: $tertiary-color;
+  border-radius: 2rem;
 }
 
 .game-qa-talk {
@@ -293,6 +318,7 @@ html.in-game {
         background-color: $global-secondary-background;
         color: $global-inverse-color;
         cursor: not-allowed;
+        border: none;
       }
     }
   }
@@ -334,6 +360,63 @@ html.in-game {
     font-size: 8px;
   }
 }
+
+#spyfall-game-ui-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  cursor: pointer;
+  display: none;
+
+  .overlay-fade {
+    transition: opacity 0.7s ease-out, transform 0.3s ease;
+    opacity: 0;
+
+    &:hover, &:active {
+      transform: scale(1.3);
+    }
+  }
+}
+
+.game-centered {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#main-container.overlay-mode {
+  #spyfall-game-ui-overlay {
+    .overlay-fade {
+      opacity: 1;
+    }
+  }
+  #game-container .game-box {
+    -webkit-filter: blur(1px);
+    filter: blur(1px);
+  }
+}
+
+#spyfall-game-ui-overlay-content {
+  border-radius: 2rem;
+  max-width: 80%;
+  position: relative;
+  color: #fff;
+}
+
+.game-messages {
+  &, &:hover, &:active {
+    background-color: rgba(0,0,0,0.8) !important;
+  }
+}
+
+.backdrop {
+  background-size: cover;
+  background-position: center;
+}
+
 
 .round-timer-position-wrap {
   position: absolute;
@@ -379,36 +462,37 @@ html.in-game {
 }
 
 .prog-timer-bg {
-
+  position: relative;
+  height: 0.5rem;
+  background-color: rgba(255,255,255,0.5);
 }
 
 .prog-timer-bar {
-  
+  height: 100%;
+  background-color: $global-primary-background;
+}
+
+.overlay-icon {
+  font-size: 6em;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.overlay-title {
+  margin-top: 3em;
+  color: inherit;
+}
+
+.overlay-description {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 
 a.uk-link-heading.uk-active:not(:hover) {
   color: $global-primary-background
 }
-
-@keyframes hidecard {
-  0% {
-    display: block;
-    transform: rotate(90deg);
-  }
-
-  100% {
-    opacity: 0;
-    display: none;
-    transform: rotate(0deg);
-  }
-}
-
-@keyframes showcard {
-  0% {
-    display: block;
-  }
-}
-
 
 @keyframes showemoji {
     0%   {
@@ -442,4 +526,8 @@ a.uk-link-heading.uk-active:not(:hover) {
     animation-duration: 500ms;
     animation-timing-function: ease-out;
   }
+}
+
+.game-fadedrop {
+  background-color: rgba(255,255,255,0.5)
 }

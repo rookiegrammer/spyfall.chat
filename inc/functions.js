@@ -3,7 +3,7 @@ const $ = global
 
 var prev = true
 
-const bytesize = 4
+const bytesize = 2
 const maxint = Math.pow(2, bytesize*8)-1
 
 $.fn.renderError = (res, error, status) => {
@@ -27,7 +27,7 @@ $.fn.generateRoomCode = (callback) => {
   global.crypto.randomBytes(bytesize, (err, buffer) => {
     if (err)
       return callback(err)
-    return callback(null, buffer.toString('hex'))
+    return callback(null, parseInt(buffer.toString('hex'), 16));
   });
 }
 
@@ -43,7 +43,7 @@ $.fn.randomInt = (min, max) => {
 $.fn.getRandomPile = (deck) => {
   if (!deck)
     deck = global.gamedata.default
-    
+
   const piles = global.gamedata.decks[deck].piles
 
   if (!piles)

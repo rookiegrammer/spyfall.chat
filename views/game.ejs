@@ -14,16 +14,16 @@
   </div>
 </div>
 
-<div id="spyfall-game-list" class="modal-loadable" uk-modal>
+<div id="spyfall-game-prompt" class="modal-loadable" uk-modal>
     <div class="uk-modal-dialog uk-modal-body">
-        <h2 class="uk-modal-title">Games you're in</h2>
+        <h2 id="spyfall-game-prompt-title" class="uk-modal-title">Games you're in</h2>
         <div class="modal-loader">
           <div class="uk-text-center">
             <div class="uk-margin-small-bottom">Finding Games Available...</div>
             <div class="lds-ripple"><div></div><div></div></div>
           </div>
         </div>
-        <div id="spyfall-game-list-content" class="modal-content">
+        <div id="spyfall-game-prompt-content" class="modal-content">
 
         </div>
         <p class="uk-text-right">
@@ -32,16 +32,12 @@
     </div>
 </div>
 
-<div id="spyfall-game-prompt" uk-modal>
-    <div class="uk-modal-dialog uk-modal-body">
-        <h2 class="uk-modal-title">Games you're in</h2>
-        <div id="spyfall-game-prompt-content" class="modal-content">
+<div id="spyfall-game-ui-overlay">
+  <div class="game-centered">
+    <div id="spyfall-game-ui-overlay-content" class="uk-padding overlay-fade uk-position-relative uk-background-secondary">
 
-        </div>
-        <p class="uk-text-right">
-            <button class="uk-button uk-button-default uk-modal-close" type="button">Close</button>
-        </p>
     </div>
+  </div>
 </div>
 
 <script>

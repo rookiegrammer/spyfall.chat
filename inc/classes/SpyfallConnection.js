@@ -127,9 +127,10 @@ SpyfallConnection.prototype.checkPhase = function(room, phase) {
       this.space.in(roomcode).emit('change_phase game', round.phase)
 
       global.fn.startTimeout(roomcode, (err, date) => {
-        this.space.in(roomcode+'+'+round.spy).emit('take_location game')
-        this.space.in(roomcode).emit('is_waiting game', date)
-
+        global.fn.pauseTimer(roomcode, (err) => {
+          this.space.in(roomcode+'+'+round.spy).emit('take_location game')
+          this.space.in(roomcode).emit('is_waiting game', date)
+        })
       })
     })
 
@@ -143,8 +144,10 @@ SpyfallConnection.prototype.checkPhase = function(room, phase) {
     room.save( (err, new_room) => {
       this.space.in(roomcode).emit('change_phase game', 3)
       global.fn.startTimeout(roomcode, (err, date) => {
-        this.space.in(roomcode+'+'+accuser).emit('take_suspicion game')
-        this.space.in(roomcode).emit('is_waiting game', date)
+        global.fn.pauseTimer(roomcode, (err) => {
+          this.space.in(roomcode+'+'+accuser).emit('take_suspicion game')
+          this.space.in(roomcode).emit('is_waiting game', date)
+        })
       })
     })
 
@@ -169,6 +172,8 @@ SpyfallConnection.prototype.scoreAndCheck = function(roomcode, scoring, username
       room.save( (err, new_room) => {
         if (err) return
         const lround = new_room.currentRound
+        this.space.in(roomcode).emit('victory game', scoring)
+
         this.space.in(roomcode).emit('round_end game', lround.location, lround.spy, global.fn.mapToObject(lround.roles), username)
         this.space.in(roomcode).emit('change_phase game', 1)
       })
@@ -188,7 +193,6 @@ SpyfallConnection.prototype.eventLoadGame = function(roomcode, ack) {
   global.fn.connectRoom(roomcode, username, (err, stateobj, exists) => {
     if (err) {
       ack(false)
-      this.socket.emit('')
       return
     }
 
@@ -205,7 +209,9 @@ SpyfallConnection.prototype.eventLocationGame = function(roomcode, guess, ack) {
     if (err) return ack({message: err.message, status: err.status})
     ack(correct)
     global.fn.stopTimeout(roomcode, (err) => {
-      this.scoreAndCheck(roomcode, correct ? 1 : 2, username)
+      global.fn.resumeTimer(roomcode, (err) => {
+        this.scoreAndCheck(roomcode, correct ? 1 : 2, username)
+      })
     })
   })
 }
@@ -238,53 +244,54 @@ SpyfallConnection.prototype.eventVoteGame = function(roomcode, vote, ack) {
     this.socket.to(roomcode).emit('has_voted game', username, vote)
     ack(true)
     if (!allvoted) return
-
-    if (consensus) {
-      this.space.in(roomcode).emit('votes_succeed game')
-      this.scoreAndCheck(roomcode, correct ? 3 : 4, room.currentRound.votedBy)
-    } else {
-      this.space.in(roomcode).emit('votes_failed game')
-      const removed = room.currentRound.willAccuse.splice(0,1)
-      room.currentRound.hasAccused.push(removed[0])
-      if (!this.checkPhase(room, 3)) {
-        room.save( (err, nn_room) => {
-          if (err) return
-          global.fn.checkEnded(roomcode, (err, round, game, e_room) => {
+    global.fn.resumeTimer(roomcode, (err) => {
+      if (consensus) {
+        this.space.in(roomcode).emit('votes_succeed game')
+        this.scoreAndCheck(roomcode, correct ? 3 : 4, room.currentRound.votedBy)
+      } else {
+        this.space.in(roomcode).emit('votes_failed game')
+        const removed = room.currentRound.willAccuse.splice(0,1)
+        room.currentRound.hasAccused.push(removed[0])
+        if (!this.checkPhase(room, 3)) {
+          room.save( (err, nn_room) => {
             if (err) return
-            if (round)
-              global.fn.roomScoring(roomcode, 0, (err, new_room) => {
-                if (err) return
-                this.space.in(roomcode).emit('update_players game', global.fn.mapToObject(new_room.players) )
-
-                new_room.currentRound.phase = 1
-                new_room.save( (err, newnew_room) => {
+            global.fn.checkEnded(roomcode, (err, round, game, e_room) => {
+              if (err) return
+              if (round)
+                global.fn.roomScoring(roomcode, 0, (err, new_room) => {
                   if (err) return
-                  const lround = newnew_room.currentRound
-                  this.space.in(roomcode).emit('round_end game', lround.location, lround.spy, global.fn.mapToObject(lround.roles), lround.votedBy)
-                  this.space.in(roomcode).emit('change_phase game', 1)
-                })
+                  this.space.in(roomcode).emit('update_players game', global.fn.mapToObject(new_room.players) )
 
-                if (game)
-                  this.wrapUp(roomcode)
-              })
-            else {
-              // recover last answerer
-              e_room.currentRound.timeoutStarted = null
-              e_room.currentRound.phase = 0
-              e_room.save( (err, new_room) => {
-                if (err) return
-                const msglen = new_room.currentRound.messages.length
-                const lastMsg = new_room.currentRound.messages[msglen-1]
-                this.space.in(roomcode).emit('change_phase game', 0)
-                global.fn.startTimeout(roomcode, (err, date) => {
-                  this.space.in(roomcode).emit('take_question game', lastMsg.toUsername, date)
+                  new_room.currentRound.phase = 1
+                  new_room.save( (err, newnew_room) => {
+                    if (err) return
+                    const lround = newnew_room.currentRound
+                    this.space.in(roomcode).emit('round_end game', lround.location, lround.spy, global.fn.mapToObject(lround.roles), lround.votedBy)
+                    this.space.in(roomcode).emit('change_phase game', 1)
+                  })
+
+                  if (game)
+                    this.wrapUp(roomcode)
                 })
-              })
-            }
+              else {
+                // recover last answerer
+                e_room.currentRound.timeoutStarted = null
+                e_room.currentRound.phase = 0
+                e_room.save( (err, new_room) => {
+                  if (err) return
+                  const msglen = new_room.currentRound.messages.length
+                  const lastMsg = new_room.currentRound.messages[msglen-1]
+                  this.space.in(roomcode).emit('change_phase game', 0)
+                  global.fn.startTimeout(roomcode, (err, date) => {
+                    this.space.in(roomcode).emit('take_question game', lastMsg.toUsername, date)
+                  })
+                })
+              }
+            })
           })
-        })
+        }
       }
-    }
+    })
   })
 }
 SpyfallConnection.prototype.eventDiscussGame = function(roomcode, message, ack) {

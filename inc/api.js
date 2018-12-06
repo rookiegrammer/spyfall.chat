@@ -10,7 +10,7 @@ const $ = global
 
 $.handle.register = (req, res, webapp) => {
   const query = req.body
-  $.fn.createUser(query.username, query.password, function(err, user) {
+  $.fn.createUser(req, query.username, query.password, function(err, user) {
 
     if (err)
       return $.fn.renderError(res, err.message, err.status)
@@ -30,8 +30,6 @@ $.handle.login = (req, res, webapp) => {
     if (err)
       return $.fn.renderError(res, err.message, err.status)
 
-
-
     console.log('Logged In: '+req.session.username)
 
     const redirect = req.query.redirect
@@ -44,6 +42,11 @@ $.handle.login = (req, res, webapp) => {
       // Respond with JSON
     }
   })
+}
+
+$.handle.logout = (req, res, webapp) => {
+  req.session.username = null;
+  res.render('success', {action: 'Logged Out', message: 'You have successfully logged out from spyfall.chat'})
 }
 
 /*
@@ -82,7 +85,7 @@ $.handle.create = (req, res, webapp) => {
       else {
         // Respond with JSON
       }
-    })
+    }, req.body)
   })
 
 }

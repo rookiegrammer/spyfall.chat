@@ -124,9 +124,14 @@ global.fn.createRoom = function(master, callback, options) {
     }
 
     if (options)
-      for (var option in def_options)
-        if (options[option])
+    for (var i=0; i<def_options.length; i++)
+      {
+        const option = def_options[i];
+        if (options[option]){
           room[option] = options[option]
+        }
+      }
+
 
     Room.create(room, function(err, room) {
 
@@ -352,11 +357,9 @@ global.fn.startTimeout = function(roomcode, callback) {
     if (err)
       return callback(err, null)
 
-    if (room.currentRound.timeoutStarted)
-      return callback(null, false)
-
     const now = new Date()
     room.currentRound.timeoutStarted = now
+
     room.save(function(err) {
       if (err)
         return callback(err, null)
@@ -720,7 +723,7 @@ global.fn.connectRoom = function(roomcode, username, callback) {
 
     const stateObject = {
       asked: !newQuestion,
-      deck: room.deck,
+      deck: deck,
       discussion: room.currentRound.discussion,
       game: {
         role: role,
@@ -742,7 +745,7 @@ global.fn.connectRoom = function(roomcode, username, callback) {
       timerDelta: room.currentRound.timerDelta,
       timerStarted: room.currentRound.timerStarted,
       timeoutLength: room.timeoutLength,
-      timeoutStarted: room.currentRound.timerStarted,
+      timeoutStarted: room.currentRound.timeoutStarted,
       username: username,
       victory: room.currentRound.victory,
       votedBy: room.currentRound.votedBy,

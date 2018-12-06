@@ -32,7 +32,7 @@ UserSchema.pre('save', function(next) {
   })
 });
 
-global.fn.createUser = function(username, password, callback) {
+global.fn.createUser = function(req, username, password, callback) {
   // Check validity with regex
 
 
@@ -40,13 +40,13 @@ global.fn.createUser = function(username, password, callback) {
   user._id = username
   user.pass = password
 
-  //use schema.create to insert user into the db
   User.create(user, function(err, user) {
     if (err && err.code == 11000) {
       const exists_error = new Error('User already exists.')
       exists_error.status = 409
       return callback(exists_error, user)
     }
+    req.session.username = username
     callback(err, user)
   })
 }

@@ -4,7 +4,12 @@
   <h1 class="uk-card-title">Create a <strong>spyfall.chat</strong> room</h1>
   <form action="/api/create" method="post">
     <input type="hidden" name="webapp" value="true">
+    <select className="uk-select" name="deck">
+      <option value="Spyfall 1">Spyfall 1</option>
+      <option value="Spyfall 2">Spyfall 2</option>
+    </select>
     <button type="submit" class="uk-button uk-button-primary">Create a Room</button>
+
   </form>
 </div>
 
