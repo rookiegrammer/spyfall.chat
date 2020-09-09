@@ -1,3 +1,5 @@
 # spyfall.chat
 
-(Not yet in release)
+A chat/game version of the card game Spyfall with 2 original decks.
+
+Progress: Working release.
