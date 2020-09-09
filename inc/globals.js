@@ -18,4 +18,5 @@ global.config.consensus_percent = 0.5
 // Heavy Config Variables
 global.config.discovery_port = 4779
 global.config.discovery_cast_addr = '233.177.192.255'
-global.config.socket_port = 9000
+
+global.config.salt_rounds = 10;

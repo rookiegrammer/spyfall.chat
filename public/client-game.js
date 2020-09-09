@@ -1,8 +1,8 @@
 var gameFn = {}
 
 $(function(){
-  const game = io.connect('http://localhost:9000/game')
-  const game_priv = io.connect('http://localhost:9000/game_priv')
+  const game = io.connect(window.location.origin+'/game')
+  const game_priv = io.connect(window.location.origin+'/game_priv')
 
   gameFn.startGame = function() {
 

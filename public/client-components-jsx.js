@@ -47,9 +47,7 @@ class MessageBox extends React.Component {
 
     this.handleInputChange = this.handleInputChange.bind(this);
 
-    const port = window.location.port
-
-    this.socket = io.connect('http://'+window.location.hostname+(port?':'+port:'')+'/chat')
+    this.socket = io.connect(window.location.origin +'/chat')
 
     this.socket.on('receive message', this.handleMessage)
 
@@ -130,27 +128,41 @@ class MessageBox extends React.Component {
 
   switchDialog = () => {
     const targets = [];
+    var firstUsername = "";
 
     const users = Object.keys(this.state.messages)
     for (var i = 0; i < users.length; i++) {
       const user = users[i];
+      if (firstUsername == "")  firstUsername = user;
       targets.push(
-        <option value={user}>{user}</option>
+        <option key={"msgr-"+user} value={user}>{user}</option>
       )
     }
+
     const contacts = this.props.contacts || [];
     for (var i = 0; i < contacts.length; i++) {
       const contact = contacts[i];
+      if (firstUsername == "")  firstUsername = contact;
       if (contact != this.state.owner && users.indexOf(contact) < 0) {
         targets.push(
-          <option value={contact}>{contact}</option>
+          <option key={"msgr-"+contact} value={contact}>{contact}</option>
         )
       }
     }
+
+    if (targets.length > 0) {
+      if (this.state.username == "") {
+        this.state.username = firstUsername;
+      }
+      return (
+        <select className="uk-select" name="username" onChange={ this.handleInputChange } value={this.state.username}>
+          {targets}
+        </select>
+      );
+    }
+
     return (
-      <select className="uk-select" name="username" onChange={ this.handleInputChange } value={this.state.username}>
-        {targets}
-      </select>
+      <input className="uk-input uk-margin-small-top uk-margin-small-bottom" type="text" name="username" onChange={this.handleInputChange} value={this.state.username} placeholder="Username" />
     )
   }
 
@@ -605,8 +617,7 @@ class SpyfallGameBox extends React.Component {
     if ( this.socket && this.socket.socket)
       this.socket.socket.connect()
     else {
-      const port = window.location.port
-      this.socket = io.connect('http://'+window.location.hostname+(port?':'+port:'')+'/game')
+      this.socket = io.connect(window.location.origin+'/game')
     }
   }
 

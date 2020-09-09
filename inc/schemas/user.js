@@ -32,22 +32,37 @@ UserSchema.pre('save', function(next) {
   })
 });
 
+global.fn.hashPassword = function(password, callback) {
+  global.bcrypt.hash( password, global.config.salt_rounds, function(err, hash) {
+      if (err) return callback("", err)
+      callback(err, hash);
+  })
+}
+
 global.fn.createUser = function(req, username, password, callback) {
   // Check validity with regex
 
 
   var user = {}
   user._id = username
-  user.pass = password
 
-  User.create(user, function(err, user) {
-    if (err && err.code == 11000) {
-      const exists_error = new Error('User already exists.')
-      exists_error.status = 409
-      return callback(exists_error, user)
+  global.fn.hashPassword(password, function(err, hash) {
+    if (err) {
+      const my_error = new Error('Cannot hash password.')
+      my_error.status = 409
+      return callback(my_error, user)
     }
-    req.session.username = username
-    callback(err, user)
+    user.pass = hash
+
+    User.create(user, function(err, user) {
+      if (err && err.code == 11000) {
+        const exists_error = new Error('User already exists.')
+        exists_error.status = 409
+        return callback(exists_error, user)
+      }
+      req.session.username = username
+      callback(err, user)
+    })
   })
 }
 

@@ -1,7 +1,10 @@
 var chatFn = {}
 
 $(function(){
-  message = io.connect('http://localhost:9000/chat')
+  var origin = window.location.origin;
+  var port = window.location.port;
+
+  message = io.connect(origin+'/chat')
 
   chatFn.sendMessage = function(user, text) {
     message.emit('send message', user, text)

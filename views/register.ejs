@@ -1,4 +1,4 @@
-<% include partials/head %>
+<%- include('partials/head') %>
 <div class="uk-card uk-card-secondary uk-card-hover uk-card-body uk-light">
   <h1 class="uk-card-title">Signup for a <strong>spyfall.chat</strong> account</h1>
   <form action="/api/register" method="post">
@@ -14,4 +14,4 @@
     <button type="submit" class="uk-button uk-button-primary">Signup</button>
   </form>
 </div>
-<% include partials/footer %>
+<%- include('partials/footer') %>

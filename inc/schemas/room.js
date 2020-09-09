@@ -753,15 +753,17 @@ global.fn.connectRoom = function(roomcode, username, callback) {
       votingFor: room.currentRound.votingFor
     }
 
+
+
     const players = global.fn.mapKeys(room.players)
     global.fn.groupConnection(players, (states) => {
       const playersObject = {}
 
-      for (const player of players)
-        playersObject[player] = Object.assign( { connected: states[player] }, room.players.get(player) )
+      for (const player of players){
+        playersObject[player] = Object.assign( { connected: states[player] }, room.players.get(player).toObject() )
+      }
 
       stateObject.players = playersObject
-
       callback(null, stateObject, exists)
     })
   })
