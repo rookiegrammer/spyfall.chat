@@ -2,4 +2,4 @@
 
 A chat/game version of the card game Spyfall with 2 original decks.
 
-Progress: Working release.
+Progress: Somewhat working release.
